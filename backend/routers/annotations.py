@@ -43,6 +43,8 @@ def make_annotation_links(
 @router.get(
     "/catalogs/{catalog_id}/videos/{video_id}/annotations",
     response_model=AnnotationListResponse,
+    summary="List annotations for a video with pagination and filtering",
+    responses={404: {"description": "Catalog or video not found"}},
 )
 def get_annotations(
     catalog_id: int,
@@ -86,11 +88,25 @@ def get_annotations(
     "/catalogs/{catalog_id}/videos/{video_id}/annotations",
     response_model=AnnotationResponse,
     status_code=status.HTTP_201_CREATED,
+    summary="Create a new annotation for a video",
+    responses={
+        201: {
+            "description": "Annotation created successfully",
+            "headers": {
+                "Location": {
+                    "description": "URI of the created annotation resource",
+                    "schema": {"type": "string"},
+                }
+            },
+        },
+        404: {"description": "Catalog or video not found"},
+    },
 )
 def create_annotation(
     catalog_id: int,
     video_id: int,
     payload: AnnotationCreate,
+    response: Response,
     db: Session = Depends(get_db),
 ):
     catalog_and_video_guard(catalog_id, video_id, db)
@@ -103,6 +119,9 @@ def create_annotation(
     db.commit()
     db.refresh(annotation)
 
+    location = f"/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation.id}"
+    response.headers["Location"] = location
+
     return {
         **annotation.to_dict(),
         "links": make_annotation_links(catalog_id, video_id, annotation.id),
@@ -112,6 +131,8 @@ def create_annotation(
 @router.get(
     "/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}",
     response_model=AnnotationResponse,
+    summary="Get an annotation by ID",
+    responses={404: {"description": "Annotation not found in scoped video"}},
 )
 def get_annotation(
     catalog_id: int,
@@ -137,6 +158,8 @@ def get_annotation(
 @router.put(
     "/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}",
     response_model=AnnotationResponse,
+    summary="Replace an annotation by ID",
+    responses={404: {"description": "Annotation not found in scoped video"}},
 )
 def update_annotation(
     catalog_id: int,
@@ -170,6 +193,8 @@ def update_annotation(
 @router.delete(
     "/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete an annotation by ID",
+    responses={404: {"description": "Annotation not found in scoped video"}},
 )
 def delete_annotation(
     catalog_id: int,

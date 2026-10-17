@@ -31,7 +31,12 @@ def make_video_links(catalog_id: int, video_id: int) -> dict[str, str]:
     }
 
 
-@router.get("/catalogs/{catalog_id}/videos", response_model=VideoListResponse)
+@router.get(
+    "/catalogs/{catalog_id}/videos",
+    response_model=VideoListResponse,
+    summary="List videos in a catalog with pagination and filtering",
+    responses={404: {"description": "Catalog not found"}},
+)
 def get_videos(
     catalog_id: int,
     limit: int = Query(10, ge=1, le=100),
@@ -71,8 +76,26 @@ def get_videos(
     "/catalogs/{catalog_id}/videos",
     response_model=VideoResponse,
     status_code=status.HTTP_201_CREATED,
+    summary="Create a new video in a catalog",
+    responses={
+        201: {
+            "description": "Video created successfully",
+            "headers": {
+                "Location": {
+                    "description": "URI of the created video resource",
+                    "schema": {"type": "string"},
+                }
+            },
+        },
+        404: {"description": "Catalog not found"},
+    },
 )
-def create_video(catalog_id: int, payload: VideoCreate, db: Session = Depends(get_db)):
+def create_video(
+    catalog_id: int,
+    payload: VideoCreate,
+    response: Response,
+    db: Session = Depends(get_db),
+):
     catalog_guard(catalog_id, db)
 
     video = Video(
@@ -83,13 +106,21 @@ def create_video(catalog_id: int, payload: VideoCreate, db: Session = Depends(ge
     db.commit()
     db.refresh(video)
 
+    location = f"/catalogs/{catalog_id}/videos/{video.id}"
+    response.headers["Location"] = location
+
     return {
         **video.to_dict(),
         "links": make_video_links(catalog_id, video.id),
     }
 
 
-@router.get("/catalogs/{catalog_id}/videos/{video_id}", response_model=VideoResponse)
+@router.get(
+    "/catalogs/{catalog_id}/videos/{video_id}",
+    response_model=VideoResponse,
+    summary="Get a video by ID within a catalog",
+    responses={404: {"description": "Catalog or video not found"}},
+)
 def get_video(catalog_id: int, video_id: int, db: Session = Depends(get_db)):
     catalog_guard(catalog_id, db)
 
@@ -106,7 +137,12 @@ def get_video(catalog_id: int, video_id: int, db: Session = Depends(get_db)):
     }
 
 
-@router.put("/catalogs/{catalog_id}/videos/{video_id}", response_model=VideoResponse)
+@router.put(
+    "/catalogs/{catalog_id}/videos/{video_id}",
+    response_model=VideoResponse,
+    summary="Replace a video by ID within a catalog",
+    responses={404: {"description": "Catalog or video not found"}},
+)
 def update_video(
     catalog_id: int,
     video_id: int,
@@ -139,6 +175,8 @@ def update_video(
 @router.delete(
     "/catalogs/{catalog_id}/videos/{video_id}",
     status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a video by ID within a catalog",
+    responses={404: {"description": "Catalog or video not found"}},
 )
 def delete_video(catalog_id: int, video_id: int, db: Session = Depends(get_db)):
     catalog_guard(catalog_id, db)

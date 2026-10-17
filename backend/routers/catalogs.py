@@ -22,7 +22,11 @@ def make_catalog_links(catalog_id: int) -> dict[str, str]:
     }
 
 
-@router.get("/catalogs", response_model=CatalogListResponse)
+@router.get(
+    "/catalogs",
+    response_model=CatalogListResponse,
+    summary="List catalogs with pagination and filtering",
+)
 def get_catalogs(
     limit: int = Query(10, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -56,8 +60,23 @@ def get_catalogs(
     "/catalogs",
     response_model=CatalogResponse,
     status_code=status.HTTP_201_CREATED,
+    summary="Create a new catalog",
+    responses={
+        201: {
+            "description": "Catalog created successfully",
+            "headers": {
+                "Location": {
+                    "description": "URI of the created catalog resource",
+                    "schema": {"type": "string"},
+                }
+            },
+        },
+        400: {"description": "Referenced user does not exist"},
+    },
 )
-def create_catalog(payload: CatalogCreate, db: Session = Depends(get_db)):
+def create_catalog(
+    payload: CatalogCreate, response: Response, db: Session = Depends(get_db)
+):
     if payload.user_id is not None and not db.get(User, payload.user_id):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -69,13 +88,21 @@ def create_catalog(payload: CatalogCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(catalog)
 
+    location = f"/catalogs/{catalog.id}"
+    response.headers["Location"] = location
+
     return {
         **catalog.to_dict(),
         "links": make_catalog_links(catalog.id),
     }
 
 
-@router.get("/catalogs/{catalog_id}", response_model=CatalogResponse)
+@router.get(
+    "/catalogs/{catalog_id}",
+    response_model=CatalogResponse,
+    summary="Get a catalog by ID",
+    responses={404: {"description": "Catalog not found"}},
+)
 def get_catalog(catalog_id: int, db: Session = Depends(get_db)):
     catalog = db.get(Catalog, catalog_id)
     if catalog is None:
@@ -90,7 +117,15 @@ def get_catalog(catalog_id: int, db: Session = Depends(get_db)):
     }
 
 
-@router.put("/catalogs/{catalog_id}", response_model=CatalogResponse)
+@router.put(
+    "/catalogs/{catalog_id}",
+    response_model=CatalogResponse,
+    summary="Replace a catalog by ID",
+    responses={
+        400: {"description": "Referenced user does not exist"},
+        404: {"description": "Catalog not found"},
+    },
+)
 def update_catalog(
     catalog_id: int, payload: CatalogUpdate, db: Session = Depends(get_db)
 ):
@@ -121,7 +156,12 @@ def update_catalog(
     }
 
 
-@router.delete("/catalogs/{catalog_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/catalogs/{catalog_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a catalog by ID",
+    responses={404: {"description": "Catalog not found"}},
+)
 def delete_catalog(catalog_id: int, db: Session = Depends(get_db)):
     catalog = db.get(Catalog, catalog_id)
     if catalog is None:
@@ -137,6 +177,8 @@ def delete_catalog(catalog_id: int, db: Session = Depends(get_db)):
 @router.get(
     "/catalogs/{catalog_id}/dashboard",
     response_model=CatalogDashboardResponse,
+    summary="Get composite catalog dashboard",
+    responses={404: {"description": "Catalog not found"}},
 )
 def get_catalog_dashboard(catalog_id: int, db: Session = Depends(get_db)):
     catalog = db.get(Catalog, catalog_id)

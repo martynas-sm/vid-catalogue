@@ -17,7 +17,11 @@ def make_user_links(user_id: int) -> dict[str, str]:
     return {"self": f"/users/{user_id}"}
 
 
-@router.get("/users", response_model=UserListResponse)
+@router.get(
+    "/users",
+    response_model=UserListResponse,
+    summary="List users with pagination and filtering",
+)
 def get_users(
     limit: int = Query(10, ge=1, le=100),
     offset: int = Query(0, ge=0),
@@ -51,8 +55,21 @@ def get_users(
     "/users",
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
+    summary="Create a new user",
+    responses={
+        201: {
+            "description": "User created successfully",
+            "headers": {
+                "Location": {
+                    "description": "URI of the created user resource",
+                    "schema": {"type": "string"},
+                }
+            },
+        },
+        409: {"description": "User with this username or email already exists"},
+    },
 )
-def create_user(payload: UserCreate, db: Session = Depends(get_db)):
+def create_user(payload: UserCreate, response: Response, db: Session = Depends(get_db)):
     existing = (
         db.query(User)
         .filter((User.username == payload.username) | (User.email == payload.email))
@@ -60,7 +77,7 @@ def create_user(payload: UserCreate, db: Session = Depends(get_db)):
     )
     if existing:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_409_CONFLICT,
             detail="User with this username or email already exists",
         )
 
@@ -74,13 +91,21 @@ def create_user(payload: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
+    location = f"/users/{user.id}"
+    response.headers["Location"] = location
+
     return {
         **user.to_dict(),
         "links": make_user_links(user.id),
     }
 
 
-@router.get("/users/{user_id}", response_model=UserResponse)
+@router.get(
+    "/users/{user_id}",
+    response_model=UserResponse,
+    summary="Get a user by ID",
+    responses={404: {"description": "User not found"}},
+)
 def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.get(User, user_id)
     if user is None:
@@ -95,7 +120,15 @@ def get_user(user_id: int, db: Session = Depends(get_db)):
     }
 
 
-@router.put("/users/{user_id}", response_model=UserResponse)
+@router.put(
+    "/users/{user_id}",
+    response_model=UserResponse,
+    summary="Replace a user by ID",
+    responses={
+        404: {"description": "User not found"},
+        409: {"description": "Username or email is already taken by another user"},
+    },
+)
 def update_user(user_id: int, payload: UserUpdate, db: Session = Depends(get_db)):
     user = db.get(User, user_id)
     if user is None:
@@ -115,7 +148,7 @@ def update_user(user_id: int, payload: UserUpdate, db: Session = Depends(get_db)
     )
     if conflict:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_409_CONFLICT,
             detail="Username or email is already taken by another user",
         )
 
@@ -132,7 +165,12 @@ def update_user(user_id: int, payload: UserUpdate, db: Session = Depends(get_db)
     }
 
 
-@router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/users/{user_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete a user by ID",
+    responses={404: {"description": "User not found"}},
+)
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.get(User, user_id)
     if user is None:
