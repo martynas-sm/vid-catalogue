@@ -1,4 +1,4 @@
-# Vaizdo įrašų katalogai (Video Catalogues)
+# Vaizdo įrašų katalogai (Video Catalogs)
 
 Saityno taikomųjų programų projektavimo (T120B165) laboratorinių darbų projektas.
 
@@ -7,7 +7,7 @@ Saityno taikomųjų programų projektavimo (T120B165) laboratorinių darbų proj
 Projekto tikslas - sukurti sistemą, palengvinančią vaizdo įrašų pakartotinį peržiūrėjimą, organizavimą bei informacijos paiešką „YouTube“ platformoje.
 
 Sistemoje realizuojamas hierarchinis duomenų sąryšis (vienas su daug):
-- **Katalogas** (`Catalogue`) -> **Vaizdo įrašas** (`Video`) -> **Anotacija** (`Annotation`)
+- **Katalogas** (`Catalog`) -> **Vaizdo įrašas** (`Video`) -> **Anotacija** (`Annotation`)
 
 ## Funkciniai reikalavimai
 

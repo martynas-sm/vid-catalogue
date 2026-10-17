@@ -1,98 +1,151 @@
-from fastapi import APIRouter, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status
+from sqlalchemy.orm import Session
+
+from database import get_db
+from models import Catalog, Video
 
 router = APIRouter()
 
 
-@router.get("/catalogues/{catalogue_id}/videos")
+def catalog_guard(catalog_id: int, db: Session):
+    catalog = db.get(Catalog, catalog_id)
+    if catalog is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Catalog with id {catalog_id} not found",
+        )
+    return catalog
+
+
+@router.get("/catalogs/{catalog_id}/videos")
 async def get_videos(
-    catalogue_id: int, limit: int = 10, offset: int = 0, title: str | None = None
+    catalog_id: int,
+    limit: int = 10,
+    offset: int = 0,
+    title: str | None = None,
+    db: Session = Depends(get_db),
 ):
-    videos = [
-        {
-            "id": 1,
-            "catalogue_id": catalogue_id,
-            "title": "Video 1",
-            "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-            "duration": 212,
-            "links": {
-                "self": f"/catalogues/{catalogue_id}/videos/1",
-                "catalogue": f"/catalogues/{catalogue_id}",
-                "annotations": f"/catalogues/{catalogue_id}/videos/1/annotations",
-            },
-        },
-        {
-            "id": 2,
-            "catalogue_id": catalogue_id,
-            "title": "Video 2",
-            "url": "https://www.youtube.com/watch?v=3JZ_D3ELwOQ",
-            "duration": 180,
-            "links": {
-                "self": f"/catalogues/{catalogue_id}/videos/2",
-                "catalogue": f"/catalogues/{catalogue_id}",
-                "annotations": f"/catalogues/{catalogue_id}/videos/2/annotations",
-            },
-        },
-    ]
+    catalog_guard(catalog_id, db)
+
+    query = db.query(Video).filter(Video.catalog_id == catalog_id)
+    if title:
+        query = query.filter(Video.title.contains(title))
+    total = query.count()
+    videos = query.offset(offset).limit(limit).all()
+
     return {
-        "videos": videos,
-        "pagination": {"limit": limit, "offset": offset, "total": len(videos)},
+        "videos": [
+            {
+                **v.to_dict(),
+                "links": {
+                    "self": f"/catalogs/{catalog_id}/videos/{v.id}",
+                    "catalog": f"/catalogs/{catalog_id}",
+                    "annotations": f"/catalogs/{catalog_id}/videos/{v.id}/annotations",
+                },
+            }
+            for v in videos
+        ],
+        "pagination": {"limit": limit, "offset": offset, "total": total},
     }
 
 
-@router.post("/catalogues/{catalogue_id}/videos", status_code=status.HTTP_201_CREATED)
-async def create_video(catalogue_id: int, payload: dict = {}):
-    created_video = {
-        "id": 3,
-        "catalogue_id": catalogue_id,
-        "title": payload.get("title", "New Video"),
-        "url": payload.get("url", "https://www.youtube.com/watch?v=example"),
-        "duration": payload.get("duration", 120),
-        "links": {
-            "self": f"/catalogues/{catalogue_id}/videos/3",
-            "catalogue": f"/catalogues/{catalogue_id}",
-            "annotations": f"/catalogues/{catalogue_id}/videos/3/annotations",
-        },
+@router.post("/catalogs/{catalog_id}/videos", status_code=status.HTTP_201_CREATED)
+async def create_video(
+    catalog_id: int, payload: dict = {}, db: Session = Depends(get_db)
+):
+    catalog_guard(catalog_id, db)
+
+    video = Video(
+        catalog_id=catalog_id,
+        title=payload.get("title", "New Video"),
+        url=payload.get("url", "https://www.youtube.com/watch?v=example"),
+        duration=float(payload.get("duration") or 0.0),
+        transcript=payload.get("transcript"),
+    )
+    db.add(video)
+    db.commit()
+    db.refresh(video)
+
+    result = video.to_dict()
+    result["links"] = {
+        "self": f"/catalogs/{catalog_id}/videos/{video.id}",
+        "catalog": f"/catalogs/{catalog_id}",
+        "annotations": f"/catalogs/{catalog_id}/videos/{video.id}/annotations",
     }
-    return {"video": created_video}
+    return {"video": result}
 
 
-@router.get("/catalogues/{catalogue_id}/videos/{video_id}")
-async def get_video(catalogue_id: int, video_id: int):
-    video = {
-        "id": video_id,
-        "catalogue_id": catalogue_id,
-        "title": f"Video {video_id}",
-        "url": f"https://www.youtube.com/watch?v=video{video_id}",
-        "duration": 300,
-        "links": {
-            "self": f"/catalogues/{catalogue_id}/videos/{video_id}",
-            "catalogue": f"/catalogues/{catalogue_id}",
-            "annotations": f"/catalogues/{catalogue_id}/videos/{video_id}/annotations",
-        },
+@router.get("/catalogs/{catalog_id}/videos/{video_id}")
+async def get_video(catalog_id: int, video_id: int, db: Session = Depends(get_db)):
+    catalog_guard(catalog_id, db)
+
+    video = db.get(Video, video_id)
+    if video is None or video.catalog_id != catalog_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Video with id {video_id} not found in catalog {catalog_id}",
+        )
+
+    result = video.to_dict()
+    result["links"] = {
+        "self": f"/catalogs/{catalog_id}/videos/{video.id}",
+        "catalog": f"/catalogs/{catalog_id}",
+        "annotations": f"/catalogs/{catalog_id}/videos/{video.id}/annotations",
     }
-    return {"video": video}
+    return {"video": result}
 
 
-@router.put("/catalogues/{catalogue_id}/videos/{video_id}")
-async def update_video(catalogue_id: int, video_id: int, payload: dict = {}):
-    updated_video = {
-        "id": video_id,
-        "catalogue_id": catalogue_id,
-        "title": payload.get("title", f"Updated Video {video_id}"),
-        "url": payload.get("url", f"https://www.youtube.com/watch?v=video{video_id}"),
-        "duration": payload.get("duration", 300),
-        "links": {
-            "self": f"/catalogues/{catalogue_id}/videos/{video_id}",
-            "catalogue": f"/catalogues/{catalogue_id}",
-            "annotations": f"/catalogues/{catalogue_id}/videos/{video_id}/annotations",
-        },
+@router.put("/catalogs/{catalog_id}/videos/{video_id}")
+async def update_video(
+    catalog_id: int,
+    video_id: int,
+    payload: dict = {},
+    db: Session = Depends(get_db),
+):
+    catalog_guard(catalog_id, db)
+
+    video = db.get(Video, video_id)
+    if video is None or video.catalog_id != catalog_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Video with id {video_id} not found in catalog {catalog_id}",
+        )
+
+    if "title" in payload:
+        video.title = payload["title"]
+    if "url" in payload:
+        video.url = payload["url"]
+    if "duration" in payload and payload["duration"] is not None:
+        video.duration = float(payload["duration"])
+    if "transcript" in payload:
+        video.transcript = payload["transcript"]
+
+    db.commit()
+    db.refresh(video)
+
+    result = video.to_dict()
+    result["links"] = {
+        "self": f"/catalogs/{catalog_id}/videos/{video.id}",
+        "catalog": f"/catalogs/{catalog_id}",
+        "annotations": f"/catalogs/{catalog_id}/videos/{video.id}/annotations",
     }
-    return {"video": updated_video}
+    return {"video": result}
 
 
 @router.delete(
-    "/catalogues/{catalogue_id}/videos/{video_id}",
+    "/catalogs/{catalog_id}/videos/{video_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def delete_video(catalogue_id: int, video_id: int):
+async def delete_video(catalog_id: int, video_id: int, db: Session = Depends(get_db)):
+    catalog_guard(catalog_id, db)
+
+    video = db.get(Video, video_id)
+    if video is None or video.catalog_id != catalog_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Video with id {video_id} not found in catalog {catalog_id}",
+        )
+
+    db.delete(video)
+    db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
