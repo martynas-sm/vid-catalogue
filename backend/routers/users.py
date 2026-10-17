@@ -1,16 +1,26 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from database import get_db
 from models import User
+from schemas.user import (
+    UserCreate,
+    UserListResponse,
+    UserResponse,
+    UserUpdate,
+)
 
 router = APIRouter()
 
 
-@router.get("/users")
-async def get_users(
-    limit: int = 10,
-    offset: int = 0,
+def make_user_links(user_id: int) -> dict[str, str]:
+    return {"self": f"/users/{user_id}"}
+
+
+@router.get("/users", response_model=UserListResponse)
+def get_users(
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     username: str | None = None,
     db: Session = Depends(get_db),
 ):
@@ -20,32 +30,32 @@ async def get_users(
     total = query.count()
     users = query.offset(offset).limit(limit).all()
 
+    self_url = f"/users?limit={limit}&offset={offset}"
+    if username:
+        self_url += f"&username={username}"
+
     return {
         "users": [
             {
-                "id": u.id,
-                "username": u.username,
-                "email": u.email,
-                "role": u.role,
-                "created_at": u.created_at,
-                "updated_at": u.updated_at,
-                "links": {"self": f"/users/{u.id}"},
+                **u.to_dict(),
+                "links": make_user_links(u.id),
             }
             for u in users
         ],
         "pagination": {"limit": limit, "offset": offset, "total": total},
+        "links": {"self": self_url},
     }
 
 
-@router.post("/users", status_code=status.HTTP_201_CREATED)
-async def create_user(payload: dict = {}, db: Session = Depends(get_db)):
-    username = payload.get("username", "user1")
-    email = payload.get("email", f"{username}@example.com")
-
-    # Check for uniqueness
+@router.post(
+    "/users",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_user(payload: UserCreate, db: Session = Depends(get_db)):
     existing = (
         db.query(User)
-        .filter((User.username == username) | (User.email == email))
+        .filter((User.username == payload.username) | (User.email == payload.email))
         .first()
     )
     if existing:
@@ -55,23 +65,23 @@ async def create_user(payload: dict = {}, db: Session = Depends(get_db)):
         )
 
     user = User(
-        username=username,
-        email=email,
-        hashed_password=payload.get("password", "secret123"),
-        role=payload.get("role", "member"),
+        username=payload.username,
+        email=payload.email,
+        hashed_password=f"hashed_{payload.password}",
+        role=payload.role,
     )
     db.add(user)
     db.commit()
     db.refresh(user)
 
-    result = user.to_dict()
-    result.pop("hashed_password", None)
-    result["links"] = {"self": f"/users/{user.id}"}
-    return {"user": result}
+    return {
+        **user.to_dict(),
+        "links": make_user_links(user.id),
+    }
 
 
-@router.get("/users/{user_id}")
-async def get_user(user_id: int, db: Session = Depends(get_db)):
+@router.get("/users/{user_id}", response_model=UserResponse)
+def get_user(user_id: int, db: Session = Depends(get_db)):
     user = db.get(User, user_id)
     if user is None:
         raise HTTPException(
@@ -79,14 +89,51 @@ async def get_user(user_id: int, db: Session = Depends(get_db)):
             detail=f"User with id {user_id} not found",
         )
 
-    result = user.to_dict()
-    result.pop("hashed_password", None)
-    result["links"] = {"self": f"/users/{user.id}"}
-    return {"user": result}
+    return {
+        **user.to_dict(),
+        "links": make_user_links(user.id),
+    }
+
+
+@router.put("/users/{user_id}", response_model=UserResponse)
+def update_user(user_id: int, payload: UserUpdate, db: Session = Depends(get_db)):
+    user = db.get(User, user_id)
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"User with id {user_id} not found",
+        )
+
+    # Check for duplicate on another user
+    conflict = (
+        db.query(User)
+        .filter(
+            (User.id != user_id)
+            & ((User.username == payload.username) | (User.email == payload.email))
+        )
+        .first()
+    )
+    if conflict:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Username or email is already taken by another user",
+        )
+
+    user.username = payload.username
+    user.email = payload.email
+    user.role = payload.role
+
+    db.commit()
+    db.refresh(user)
+
+    return {
+        **user.to_dict(),
+        "links": make_user_links(user.id),
+    }
 
 
 @router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(user_id: int, db: Session = Depends(get_db)):
+def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.get(User, user_id)
     if user is None:
         raise HTTPException(

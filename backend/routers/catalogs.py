@@ -1,16 +1,31 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from database import get_db
-from models import Annotation, Catalog, Video
+from models import Annotation, Catalog, User, Video
+from schemas.catalog import (
+    CatalogCreate,
+    CatalogDashboardResponse,
+    CatalogListResponse,
+    CatalogResponse,
+    CatalogUpdate,
+)
 
 router = APIRouter()
 
 
-@router.get("/catalogs")
-async def get_catalogs(
-    limit: int = 10,
-    offset: int = 0,
+def make_catalog_links(catalog_id: int) -> dict[str, str]:
+    return {
+        "self": f"/catalogs/{catalog_id}",
+        "videos": f"/catalogs/{catalog_id}/videos",
+        "dashboard": f"/catalogs/{catalog_id}/dashboard",
+    }
+
+
+@router.get("/catalogs", response_model=CatalogListResponse)
+def get_catalogs(
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     name: str | None = None,
     db: Session = Depends(get_db),
 ):
@@ -20,45 +35,48 @@ async def get_catalogs(
     total = query.count()
     catalogs = query.offset(offset).limit(limit).all()
 
+    self_url = f"/catalogs?limit={limit}&offset={offset}"
+    if name:
+        self_url += f"&name={name}"
+
     return {
         "catalogs": [
             {
                 **c.to_dict(),
-                "links": {
-                    "self": f"/catalogs/{c.id}",
-                    "videos": f"/catalogs/{c.id}/videos",
-                    "dashboard": f"/catalogs/{c.id}/dashboard",
-                },
+                "links": make_catalog_links(c.id),
             }
             for c in catalogs
         ],
         "pagination": {"limit": limit, "offset": offset, "total": total},
+        "links": {"self": self_url},
     }
 
 
-@router.post("/catalogs", status_code=status.HTTP_201_CREATED)
-async def create_catalog(payload: dict = {}, db: Session = Depends(get_db)):
-    catalog = Catalog(
-        user_id=payload.get("user_id"),
-        name=payload.get("name", "New Catalog"),
-        description=payload.get("description"),
-        is_public=bool(payload.get("is_public", True)),
-    )
+@router.post(
+    "/catalogs",
+    response_model=CatalogResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_catalog(payload: CatalogCreate, db: Session = Depends(get_db)):
+    if payload.user_id is not None and not db.get(User, payload.user_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Referenced user with id {payload.user_id} does not exist",
+        )
+
+    catalog = Catalog(**payload.model_dump())
     db.add(catalog)
     db.commit()
     db.refresh(catalog)
 
-    result = catalog.to_dict()
-    result["links"] = {
-        "self": f"/catalogs/{catalog.id}",
-        "videos": f"/catalogs/{catalog.id}/videos",
-        "dashboard": f"/catalogs/{catalog.id}/dashboard",
+    return {
+        **catalog.to_dict(),
+        "links": make_catalog_links(catalog.id),
     }
-    return {"catalog": result}
 
 
-@router.get("/catalogs/{catalog_id}")
-async def get_catalog(catalog_id: int, db: Session = Depends(get_db)):
+@router.get("/catalogs/{catalog_id}", response_model=CatalogResponse)
+def get_catalog(catalog_id: int, db: Session = Depends(get_db)):
     catalog = db.get(Catalog, catalog_id)
     if catalog is None:
         raise HTTPException(
@@ -66,18 +84,15 @@ async def get_catalog(catalog_id: int, db: Session = Depends(get_db)):
             detail=f"Catalog with id {catalog_id} not found",
         )
 
-    result = catalog.to_dict()
-    result["links"] = {
-        "self": f"/catalogs/{catalog.id}",
-        "videos": f"/catalogs/{catalog.id}/videos",
-        "dashboard": f"/catalogs/{catalog.id}/dashboard",
+    return {
+        **catalog.to_dict(),
+        "links": make_catalog_links(catalog.id),
     }
-    return {"catalog": result}
 
 
-@router.put("/catalogs/{catalog_id}")
-async def update_catalog(
-    catalog_id: int, payload: dict = {}, db: Session = Depends(get_db)
+@router.put("/catalogs/{catalog_id}", response_model=CatalogResponse)
+def update_catalog(
+    catalog_id: int, payload: CatalogUpdate, db: Session = Depends(get_db)
 ):
     catalog = db.get(Catalog, catalog_id)
     if catalog is None:
@@ -86,28 +101,28 @@ async def update_catalog(
             detail=f"Catalog with id {catalog_id} not found",
         )
 
-    if "name" in payload:
-        catalog.name = payload["name"]
-    if "description" in payload:
-        catalog.description = payload["description"]
-    if "is_public" in payload:
-        catalog.is_public = bool(payload["is_public"])
-    if "user_id" in payload:
-        catalog.user_id = payload["user_id"]
+    if payload.user_id is not None and not db.get(User, payload.user_id):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Referenced user with id {payload.user_id} does not exist",
+        )
+
+    catalog.name = payload.name
+    catalog.description = payload.description
+    catalog.is_public = payload.is_public
+    catalog.user_id = payload.user_id
 
     db.commit()
     db.refresh(catalog)
 
-    result = catalog.to_dict()
-    result["links"] = {
-        "self": f"/catalogs/{catalog.id}",
-        "videos": f"/catalogs/{catalog.id}/videos",
+    return {
+        **catalog.to_dict(),
+        "links": make_catalog_links(catalog.id),
     }
-    return {"catalog": result}
 
 
 @router.delete("/catalogs/{catalog_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_catalog(catalog_id: int, db: Session = Depends(get_db)):
+def delete_catalog(catalog_id: int, db: Session = Depends(get_db)):
     catalog = db.get(Catalog, catalog_id)
     if catalog is None:
         raise HTTPException(
@@ -119,8 +134,11 @@ async def delete_catalog(catalog_id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.get("/catalogs/{catalog_id}/dashboard")
-async def get_catalog_dashboard(catalog_id: int, db: Session = Depends(get_db)):
+@router.get(
+    "/catalogs/{catalog_id}/dashboard",
+    response_model=CatalogDashboardResponse,
+)
+def get_catalog_dashboard(catalog_id: int, db: Session = Depends(get_db)):
     catalog = db.get(Catalog, catalog_id)
     if catalog is None:
         raise HTTPException(
@@ -128,7 +146,12 @@ async def get_catalog_dashboard(catalog_id: int, db: Session = Depends(get_db)):
             detail=f"Catalog with id {catalog_id} not found",
         )
 
-    videos = db.query(Video).filter(Video.catalog_id == catalog_id).all()
+    videos = (
+        db.query(Video)
+        .filter(Video.catalog_id == catalog_id)
+        .order_by(Video.created_at.desc())
+        .all()
+    )
     video_ids = [v.id for v in videos]
     total_annotations = (
         db.query(Annotation).filter(Annotation.video_id.in_(video_ids)).count()
@@ -152,11 +175,15 @@ async def get_catalog_dashboard(catalog_id: int, db: Session = Depends(get_db)):
     return {
         "catalog": {
             **catalog.to_dict(),
-            "links": {"self": f"/catalogs/{catalog_id}"},
+            "links": make_catalog_links(catalog.id),
         },
         "stats": {
             "total_videos": len(videos),
             "total_annotations": total_annotations,
         },
         "recent_videos": recent_videos,
+        "links": {
+            "self": f"/catalogs/{catalog_id}/dashboard",
+            "catalog": f"/catalogs/{catalog_id}",
+        },
     }

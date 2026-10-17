@@ -1,8 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
 from database import get_db
 from models import Annotation, Catalog, Video
+from schemas.annotation import (
+    AnnotationCreate,
+    AnnotationListResponse,
+    AnnotationResponse,
+    AnnotationUpdate,
+)
 
 router = APIRouter()
 
@@ -24,12 +30,25 @@ def catalog_and_video_guard(catalog_id: int, video_id: int, db: Session):
     return catalog, video
 
 
-@router.get("/catalogs/{catalog_id}/videos/{video_id}/annotations")
-async def get_annotations(
+def make_annotation_links(
+    catalog_id: int, video_id: int, annotation_id: int
+) -> dict[str, str]:
+    return {
+        "self": f"/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}",
+        "video": f"/catalogs/{catalog_id}/videos/{video_id}",
+        "catalog": f"/catalogs/{catalog_id}",
+    }
+
+
+@router.get(
+    "/catalogs/{catalog_id}/videos/{video_id}/annotations",
+    response_model=AnnotationListResponse,
+)
+def get_annotations(
     catalog_id: int,
     video_id: int,
-    limit: int = 10,
-    offset: int = 0,
+    limit: int = Query(10, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     text: str | None = None,
     db: Session = Depends(get_db),
 ):
@@ -42,11 +61,21 @@ async def get_annotations(
     total = query.count()
     annotations = query.offset(offset).limit(limit).all()
 
+    self_url = f"/catalogs/{catalog_id}/videos/{video_id}/annotations?limit={limit}&offset={offset}"
+    if text:
+        self_url += f"&text={text}"
+
     return {
-        "annotations": [a.to_dict() for a in annotations],
+        "annotations": [
+            {
+                **a.to_dict(),
+                "links": make_annotation_links(catalog_id, video_id, a.id),
+            }
+            for a in annotations
+        ],
         "pagination": {"limit": limit, "offset": offset, "total": total},
         "links": {
-            "self": f"/catalogs/{catalog_id}/videos/{video_id}/annotations?limit={limit}&offset={offset}&text={text or ''}",
+            "self": self_url,
             "video": f"/catalogs/{catalog_id}/videos/{video_id}",
             "catalog": f"/catalogs/{catalog_id}",
         },
@@ -55,37 +84,36 @@ async def get_annotations(
 
 @router.post(
     "/catalogs/{catalog_id}/videos/{video_id}/annotations",
+    response_model=AnnotationResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def create_annotation(
+def create_annotation(
     catalog_id: int,
     video_id: int,
-    payload: dict = {},
+    payload: AnnotationCreate,
     db: Session = Depends(get_db),
 ):
     catalog_and_video_guard(catalog_id, video_id, db)
 
     annotation = Annotation(
         video_id=video_id,
-        text=payload.get("text", "New Annotation"),
-        from_dur=float(payload.get("from_dur") or 0.0),
-        to_dur=float(payload.get("to_dur") or 10.0),
+        **payload.model_dump(),
     )
     db.add(annotation)
     db.commit()
     db.refresh(annotation)
 
-    result = annotation.to_dict()
-    result["links"] = {
-        "self": f"/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation.id}",
-        "video": f"/catalogs/{catalog_id}/videos/{video_id}",
-        "catalog": f"/catalogs/{catalog_id}",
+    return {
+        **annotation.to_dict(),
+        "links": make_annotation_links(catalog_id, video_id, annotation.id),
     }
-    return {"annotation": result}
 
 
-@router.get("/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}")
-async def get_annotation(
+@router.get(
+    "/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}",
+    response_model=AnnotationResponse,
+)
+def get_annotation(
     catalog_id: int,
     video_id: int,
     annotation_id: int,
@@ -100,21 +128,21 @@ async def get_annotation(
             detail=f"Annotation with id {annotation_id} not found for video {video_id}",
         )
 
-    result = annotation.to_dict()
-    result["links"] = {
-        "self": f"/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}",
-        "video": f"/catalogs/{catalog_id}/videos/{video_id}",
-        "catalog": f"/catalogs/{catalog_id}",
+    return {
+        **annotation.to_dict(),
+        "links": make_annotation_links(catalog_id, video_id, annotation.id),
     }
-    return {"annotation": result}
 
 
-@router.put("/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}")
-async def update_annotation(
+@router.put(
+    "/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}",
+    response_model=AnnotationResponse,
+)
+def update_annotation(
     catalog_id: int,
     video_id: int,
     annotation_id: int,
-    payload: dict = {},
+    payload: AnnotationUpdate,
     db: Session = Depends(get_db),
 ):
     catalog_and_video_guard(catalog_id, video_id, db)
@@ -126,30 +154,24 @@ async def update_annotation(
             detail=f"Annotation with id {annotation_id} not found for video {video_id}",
         )
 
-    if "text" in payload:
-        annotation.text = payload["text"]
-    if "from_dur" in payload and payload["from_dur"] is not None:
-        annotation.from_dur = float(payload["from_dur"])
-    if "to_dur" in payload and payload["to_dur"] is not None:
-        annotation.to_dur = float(payload["to_dur"])
+    annotation.text = payload.text
+    annotation.from_dur = payload.from_dur
+    annotation.to_dur = payload.to_dur
 
     db.commit()
     db.refresh(annotation)
 
-    result = annotation.to_dict()
-    result["links"] = {
-        "self": f"/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}",
-        "video": f"/catalogs/{catalog_id}/videos/{video_id}",
-        "catalog": f"/catalogs/{catalog_id}",
+    return {
+        **annotation.to_dict(),
+        "links": make_annotation_links(catalog_id, video_id, annotation.id),
     }
-    return {"annotation": result}
 
 
 @router.delete(
     "/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}",
     status_code=status.HTTP_204_NO_CONTENT,
 )
-async def delete_annotation(
+def delete_annotation(
     catalog_id: int,
     video_id: int,
     annotation_id: int,
