@@ -12,5 +12,11 @@ Agents should use red-teaming, pre-mortem, and first-principles decomposition to
 
 ## Context
 
+`./task` folder contains documents related with the project task
+`./task/bendri-kriterijai-orig.pdf` is the original PDF file for grading criteria for the 3 lab works
+`./task/bendri-kriterijai.md` is the converted markdown version of the original requirements for the 3 lab works
+`./task/reikalavimai-1-lab.md` short version of 1st lab requirements
+`./task/lab_tema.md` my chosen topic for the project, with the initial idea for the final app (which won't be the exact same as intermediate apps)
+`./backend` is the Python FastAPI backend
 
-
+Current stage: working on lab 1

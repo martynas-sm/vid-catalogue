@@ -1,0 +1,12 @@
+Reikalavimai 1 laboratorinam darbui
+- Suprojektuoti ir realizuoti REST principais veikiančią API sąsają. Turi būti realizuoti visi užduotyje numatyti API sąsajos metodai!
+- Pateikti OpenAPI specifikaciją kiekvienam API metodui;
+- Paruošti programavimo aplinką leidžiančią atsiskaitymo metu patogiai paleisti ir pademonstruoti programą.
+- Duomenų saugojimui turi būti panaudotas pasirinktas DB sprendimas. Gynimo metu DB turi būti užpildyta prasmingais (uždavinį atitinkančiais) duomenimis;
+- Turi būti galimybė iškviesti sąsajos funkcijas (naudojantis naršykle, Postman ar kitu įrankiu) ir gauti teisingai suformuotą atsakymą: prasmingas turinys, teisingas turinio tipas (json, xml, atom, text ar kt.), teisingas atsako kodas (http reponse code);
+- Pasiruošti ir pademonstruoti, jog veikia visi 15 API metodų. Demonstracija turėtų trukti iki ~15s. Pavyzdžiui, su Postman collections ir tests. Taupome jūsų ir savo laiką. Papildomai pasiruošti pademonstruoti:
+- Kai resursas negali būti rastas (turi grąžinti 404)
+- Kai paduodamas blogas payload, turi grąžinti 400/422 priklausomai nuo situacijos
+- Kai resursas sukuriamas - 201
+- Kai resursas ištrinamas - 200/204 priklausomai, ar grąžinamas response body
+- Projekto kodas turi būti laikomas Git saugykloje (github, bitbucket, gitlab ar kt.). Dokumentacija - projektui sukurtame wiki arba projekto kodo Git saugykloje (.readme).
