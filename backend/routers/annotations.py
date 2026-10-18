@@ -9,6 +9,7 @@ from schemas.annotation import (
     AnnotationResponse,
     AnnotationUpdate,
 )
+from schemas.common import make_pagination_links
 
 router = APIRouter()
 
@@ -63,9 +64,13 @@ def get_annotations(
     total = query.count()
     annotations = query.offset(offset).limit(limit).all()
 
-    self_url = f"/catalogs/{catalog_id}/videos/{video_id}/annotations?limit={limit}&offset={offset}"
-    if text:
-        self_url += f"&text={text}"
+    pagination_links = make_pagination_links(
+        base_path=f"/catalogs/{catalog_id}/videos/{video_id}/annotations",
+        limit=limit,
+        offset=offset,
+        total=total,
+        extra_params={"text": text} if text else None,
+    )
 
     return {
         "annotations": [
@@ -77,7 +82,7 @@ def get_annotations(
         ],
         "pagination": {"limit": limit, "offset": offset, "total": total},
         "links": {
-            "self": self_url,
+            **pagination_links,
             "video": f"/catalogs/{catalog_id}/videos/{video_id}",
             "catalog": f"/catalogs/{catalog_id}",
         },

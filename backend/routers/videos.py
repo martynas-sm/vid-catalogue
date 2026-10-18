@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import Catalog, Video
+from schemas.common import make_pagination_links
 from schemas.video import (
     VideoCreate,
     VideoListResponse,
@@ -52,9 +53,13 @@ def get_videos(
     total = query.count()
     videos = query.offset(offset).limit(limit).all()
 
-    self_url = f"/catalogs/{catalog_id}/videos?limit={limit}&offset={offset}"
-    if title:
-        self_url += f"&title={title}"
+    pagination_links = make_pagination_links(
+        base_path=f"/catalogs/{catalog_id}/videos",
+        limit=limit,
+        offset=offset,
+        total=total,
+        extra_params={"title": title} if title else None,
+    )
 
     return {
         "videos": [
@@ -66,7 +71,7 @@ def get_videos(
         ],
         "pagination": {"limit": limit, "offset": offset, "total": total},
         "links": {
-            "self": self_url,
+            **pagination_links,
             "catalog": f"/catalogs/{catalog_id}",
         },
     }
@@ -161,7 +166,7 @@ def update_video(
     video.title = payload.title
     video.url = payload.url
     video.duration = payload.duration
-    video.transcript = payload.transcript
+    video.description = payload.description
 
     db.commit()
     db.refresh(video)

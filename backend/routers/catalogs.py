@@ -10,6 +10,7 @@ from schemas.catalog import (
     CatalogResponse,
     CatalogUpdate,
 )
+from schemas.common import make_pagination_links
 
 router = APIRouter()
 
@@ -39,9 +40,13 @@ def get_catalogs(
     total = query.count()
     catalogs = query.offset(offset).limit(limit).all()
 
-    self_url = f"/catalogs?limit={limit}&offset={offset}"
-    if name:
-        self_url += f"&name={name}"
+    links = make_pagination_links(
+        base_path="/catalogs",
+        limit=limit,
+        offset=offset,
+        total=total,
+        extra_params={"name": name} if name else None,
+    )
 
     return {
         "catalogs": [
@@ -52,7 +57,7 @@ def get_catalogs(
             for c in catalogs
         ],
         "pagination": {"limit": limit, "offset": offset, "total": total},
-        "links": {"self": self_url},
+        "links": links,
     }
 
 

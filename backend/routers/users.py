@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from models import User
+from schemas.common import make_pagination_links
 from schemas.user import (
     UserCreate,
     UserListResponse,
@@ -34,9 +35,13 @@ def get_users(
     total = query.count()
     users = query.offset(offset).limit(limit).all()
 
-    self_url = f"/users?limit={limit}&offset={offset}"
-    if username:
-        self_url += f"&username={username}"
+    pagination_links = make_pagination_links(
+        base_path="/users",
+        limit=limit,
+        offset=offset,
+        total=total,
+        extra_params={"username": username} if username else None,
+    )
 
     return {
         "users": [
@@ -47,7 +52,7 @@ def get_users(
             for u in users
         ],
         "pagination": {"limit": limit, "offset": offset, "total": total},
-        "links": {"self": self_url},
+        "links": pagination_links,
     }
 
 

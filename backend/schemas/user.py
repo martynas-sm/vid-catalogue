@@ -8,31 +8,51 @@ from schemas.common import PaginationMeta
 
 class UserBase(BaseModel):
     username: str = Field(
-        ..., min_length=3, max_length=50, description="Unique username"
+        ...,
+        min_length=3,
+        max_length=50,
+        description="Unique username",
+        examples=["adomas"],
     )
-    email: EmailStr = Field(..., description="Unique email address")
+    email: EmailStr = Field(
+        ...,
+        description="Unique email address",
+        examples=["adomas@example.com"],
+    )
     role: Literal["guest", "member", "admin"] = Field(
-        default="member", description="User role ('guest', 'member', 'admin')"
+        default="member",
+        description="User role ('guest', 'member', 'admin')",
+        examples=["admin"],
     )
 
 
 class UserCreate(UserBase):
     password: str = Field(
-        ..., min_length=6, max_length=100, description="User password"
+        ...,
+        min_length=6,
+        max_length=100,
+        description="User password",
+        examples=["secretpassword123"],
     )
 
 
 class UserUpdate(BaseModel):
-    username: str = Field(..., min_length=3, max_length=50)
-    email: EmailStr = Field(...)
-    role: Literal["guest", "member", "admin"] = Field(default="member")
+    username: str = Field(..., min_length=3, max_length=50, examples=["adomas"])
+    email: EmailStr = Field(..., examples=["adomas@example.com"])
+    role: Literal["guest", "member", "admin"] = Field(
+        default="member", examples=["admin"]
+    )
 
 
 class UserResponse(UserBase):
-    id: int
+    id: int = Field(..., examples=[1])
     created_at: datetime
     updated_at: datetime
-    links: dict[str, str] = Field(default_factory=dict)
+    links: dict[str, str] = Field(
+        default_factory=dict,
+        description="HATEOAS hypermedia links",
+        examples=[{"self": "/users/1"}],
+    )
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -40,4 +60,8 @@ class UserResponse(UserBase):
 class UserListResponse(BaseModel):
     users: list[UserResponse]
     pagination: PaginationMeta
-    links: dict[str, str] = Field(default_factory=dict)
+    links: dict[str, str] = Field(
+        default_factory=dict,
+        description="HATEOAS pagination links",
+        examples=[{"self": "/users?limit=10&offset=0"}],
+    )

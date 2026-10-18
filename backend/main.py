@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import IntegrityError
 
@@ -11,6 +12,14 @@ app = FastAPI(
     title="Video Catalogs API",
     version="1.0.0",
     description="REST API for Video Catalogs application (KTU Saityno taikomųjų programų projektavimas).",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
