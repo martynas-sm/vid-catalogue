@@ -1,9 +1,8 @@
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from sqlalchemy.exc import IntegrityError
 
 from database import engine
+from exceptions import register_exception_handlers
 from models import Base
 from routers import annotations, catalogs, users, videos
 
@@ -22,13 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@app.exception_handler(IntegrityError)
-def integrity_error_handler(request: Request, exc: IntegrityError):
-    return JSONResponse(
-        status_code=status.HTTP_409_CONFLICT,
-        content={"detail": "Database integrity conflict occurred."},
-    )
+register_exception_handlers(app)
 
 
 # Router structure from: https://fastapi.tiangolo.com/tutorial/bigger-applications/
