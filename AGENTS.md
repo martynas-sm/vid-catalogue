@@ -17,6 +17,7 @@ Agents should use red-teaming, pre-mortem, and first-principles decomposition to
 `./task/bendri-kriterijai.md` is the converted markdown version of the original requirements for the 3 lab works
 `./task/reikalavimai-1-lab.md` short version of 1st lab requirements
 `./task/lab_tema.md` my chosen topic for the project, with the initial idea for the final app (which won't be the exact same as intermediate apps)
+`./task/modulio-skaidres.md` slides for this module task, not well formatted
 `./backend` is the Python FastAPI backend
 
 Current stage: working on lab 1
