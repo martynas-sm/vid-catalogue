@@ -1,0 +1,145 @@
+meta {
+  name: Get composite catalog dashboard
+  type: http
+  seq: 6
+  tags: [
+    Catalogs
+  ]
+}
+
+get {
+  url: {{baseUrl}}/catalogs/:catalog_id/dashboard
+  body: none
+  auth: inherit
+}
+
+params:path {
+  catalog_id: 1
+}
+
+example {
+  name: 200 Response
+  description: Successful Response
+  
+  request: {
+    url: {{baseUrl}}/catalogs/:catalog_id/dashboard
+    method: GET
+    mode: none
+    params:path: {
+      catalog_id: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "catalog": {
+            "name": "",
+            "description": "",
+            "is_public": false,
+            "id": 0,
+            "user_id": "",
+            "created_at": "",
+            "updated_at": "",
+            "links": {}
+          },
+          "stats": {
+            "total_videos": 0,
+            "total_annotations": 0
+          },
+          "recent_videos": [
+            {
+              "id": 0,
+              "title": "",
+              "duration": 0,
+              "annotation_count": 0,
+              "links": {}
+            }
+          ],
+          "links": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Catalog not found
+  
+  request: {
+    url: {{baseUrl}}/catalogs/:catalog_id/dashboard
+    method: GET
+    mode: none
+    params:path: {
+      catalog_id: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 Response
+  description: Validation Error
+  
+  request: {
+    url: {{baseUrl}}/catalogs/:catalog_id/dashboard
+    method: GET
+    mode: none
+    params:path: {
+      catalog_id: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": [
+            {
+              "loc": [],
+              "msg": "",
+              "type": "",
+              "input": "",
+              "ctx": {}
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,27 @@
+meta {
+  name: 400 Bad Request - Invalid Foreign Key
+  type: http
+  seq: 3
+  tags: [
+    Errors
+  ]
+}
+
+post {
+  url: {{baseUrl}}/catalogs
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Orphan Catalog",
+    "description": "Attempting to create a catalog with non-existent user_id",
+    "is_public": true,
+    "user_id": 99999
+  }
+}
+
+docs {
+  Demonstrates 400 Bad Request error handling when referencing a non-existent parent foreign key.
+}

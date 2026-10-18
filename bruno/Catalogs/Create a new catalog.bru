@@ -1,0 +1,149 @@
+meta {
+  name: Create a new catalog
+  type: http
+  seq: 2
+  tags: [
+    Catalogs
+  ]
+}
+
+post {
+  url: {{baseUrl}}/catalogs
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Cloud Computing",
+    "description": "Distributed systems, Docker containers, and Kubernetes architectures",
+    "is_public": true,
+    "user_id": 1
+  }
+}
+
+example {
+  name: 201 Response
+  description: Catalog created successfully
+  
+  request: {
+    url: {{baseUrl}}/catalogs
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "name": "",
+        "description": "",
+        "is_public": false,
+        "user_id": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "name": "",
+          "description": "",
+          "is_public": false,
+          "id": 0,
+          "user_id": "",
+          "created_at": "",
+          "updated_at": "",
+          "links": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: Referenced user does not exist
+  
+  request: {
+    url: {{baseUrl}}/catalogs
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "name": "",
+        "description": "",
+        "is_public": false,
+        "user_id": ""
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 Response
+  description: Validation Error
+  
+  request: {
+    url: {{baseUrl}}/catalogs
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "name": "",
+        "description": "",
+        "is_public": false,
+        "user_id": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": [
+            {
+              "loc": [],
+              "msg": "",
+              "type": "",
+              "input": "",
+              "ctx": {}
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

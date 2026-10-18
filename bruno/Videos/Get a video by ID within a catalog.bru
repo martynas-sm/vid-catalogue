@@ -1,0 +1,134 @@
+meta {
+  name: Get a video by ID within a catalog
+  type: http
+  seq: 3
+  tags: [
+    Videos
+  ]
+}
+
+get {
+  url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  catalog_id: 1
+  video_id: 1
+}
+
+example {
+  name: 200 Response
+  description: Successful Response
+  
+  request: {
+    url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id
+    method: GET
+    mode: none
+    params:path: {
+      catalog_id: 
+      video_id: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "title": "",
+          "url": "",
+          "duration": 0,
+          "description": "",
+          "id": 0,
+          "catalog_id": 0,
+          "created_at": "",
+          "updated_at": "",
+          "links": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Catalog or video not found
+  
+  request: {
+    url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id
+    method: GET
+    mode: none
+    params:path: {
+      catalog_id: 
+      video_id: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 Response
+  description: Validation Error
+  
+  request: {
+    url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id
+    method: GET
+    mode: none
+    params:path: {
+      catalog_id: 
+      video_id: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": [
+            {
+              "loc": [],
+              "msg": "",
+              "type": "",
+              "input": "",
+              "ctx": {}
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

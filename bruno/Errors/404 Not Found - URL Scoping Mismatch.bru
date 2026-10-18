@@ -1,0 +1,23 @@
+meta {
+  name: 404 Not Found - URL Scoping Mismatch
+  type: http
+  seq: 2
+  tags: [
+    Errors
+  ]
+}
+
+get {
+  url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  catalog_id: 1
+  video_id: 4
+}
+
+docs {
+  Demonstrates strict URL hierarchy scoping validation: video 4 exists in catalog 2, but requesting it under catalog 1 yields 404 Not Found.
+}

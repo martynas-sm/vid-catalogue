@@ -1,0 +1,2358 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Video Catalogs API",
+    "description": "REST API for Video Catalogs application (KTU Saityno taikom\u0173j\u0173 program\u0173 projektavimas).",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/catalogs": {
+      "get": {
+        "tags": [
+          "Catalogs"
+        ],
+        "summary": "List catalogs with pagination and filtering",
+        "operationId": "get_catalogs_catalogs_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Catalogs"
+        ],
+        "summary": "Create a new catalog",
+        "operationId": "create_catalog_catalogs_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Catalog created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogResponse"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "URI of the created catalog resource",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Referenced user does not exist"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalogs/{catalog_id}": {
+      "get": {
+        "tags": [
+          "Catalogs"
+        ],
+        "summary": "Get a catalog by ID",
+        "operationId": "get_catalog_catalogs__catalog_id__get",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Catalog not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Catalogs"
+        ],
+        "summary": "Replace a catalog by ID",
+        "operationId": "update_catalog_catalogs__catalog_id__put",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CatalogUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Referenced user does not exist"
+          },
+          "404": {
+            "description": "Catalog not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Catalogs"
+        ],
+        "summary": "Delete a catalog by ID",
+        "operationId": "delete_catalog_catalogs__catalog_id__delete",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Catalog not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalogs/{catalog_id}/dashboard": {
+      "get": {
+        "tags": [
+          "Catalogs"
+        ],
+        "summary": "Get composite catalog dashboard",
+        "operationId": "get_catalog_dashboard_catalogs__catalog_id__dashboard_get",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalogDashboardResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Catalog not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalogs/{catalog_id}/videos": {
+      "get": {
+        "tags": [
+          "Videos"
+        ],
+        "summary": "List videos in a catalog with pagination and filtering",
+        "operationId": "get_videos_catalogs__catalog_id__videos_get",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Title"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoListResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Catalog not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Videos"
+        ],
+        "summary": "Create a new video in a catalog",
+        "operationId": "create_video_catalogs__catalog_id__videos_post",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VideoCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Video created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoResponse"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "URI of the created video resource",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Catalog not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalogs/{catalog_id}/videos/{video_id}": {
+      "get": {
+        "tags": [
+          "Videos"
+        ],
+        "summary": "Get a video by ID within a catalog",
+        "operationId": "get_video_catalogs__catalog_id__videos__video_id__get",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          },
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Video Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Catalog or video not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Videos"
+        ],
+        "summary": "Replace a video by ID within a catalog",
+        "operationId": "update_video_catalogs__catalog_id__videos__video_id__put",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          },
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Video Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VideoUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VideoResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Catalog or video not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Videos"
+        ],
+        "summary": "Delete a video by ID within a catalog",
+        "operationId": "delete_video_catalogs__catalog_id__videos__video_id__delete",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          },
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Video Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Catalog or video not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalogs/{catalog_id}/videos/{video_id}/annotations": {
+      "get": {
+        "tags": [
+          "Annotations"
+        ],
+        "summary": "List annotations for a video with pagination and filtering",
+        "operationId": "get_annotations_catalogs__catalog_id__videos__video_id__annotations_get",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          },
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Video Id"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "text",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Text"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnotationListResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Catalog or video not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Annotations"
+        ],
+        "summary": "Create a new annotation for a video",
+        "operationId": "create_annotation_catalogs__catalog_id__videos__video_id__annotations_post",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          },
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Video Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnotationCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Annotation created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnotationResponse"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "URI of the created annotation resource",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Catalog or video not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}": {
+      "get": {
+        "tags": [
+          "Annotations"
+        ],
+        "summary": "Get an annotation by ID",
+        "operationId": "get_annotation_catalogs__catalog_id__videos__video_id__annotations__annotation_id__get",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          },
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Video Id"
+            }
+          },
+          {
+            "name": "annotation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Annotation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnotationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Annotation not found in scoped video"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Annotations"
+        ],
+        "summary": "Replace an annotation by ID",
+        "operationId": "update_annotation_catalogs__catalog_id__videos__video_id__annotations__annotation_id__put",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          },
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Video Id"
+            }
+          },
+          {
+            "name": "annotation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Annotation Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnotationUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnotationResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Annotation not found in scoped video"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Annotations"
+        ],
+        "summary": "Delete an annotation by ID",
+        "operationId": "delete_annotation_catalogs__catalog_id__videos__video_id__annotations__annotation_id__delete",
+        "parameters": [
+          {
+            "name": "catalog_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Catalog Id"
+            }
+          },
+          {
+            "name": "video_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Video Id"
+            }
+          },
+          {
+            "name": "annotation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Annotation Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "Annotation not found in scoped video"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "List users with pagination and filtering",
+        "operationId": "get_users_users_get",
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 10,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0,
+              "title": "Offset"
+            }
+          },
+          {
+            "name": "username",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Username"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserListResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create a new user",
+        "operationId": "create_user_users_post",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            },
+            "headers": {
+              "Location": {
+                "description": "URI of the created user resource",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "User with this username or email already exists"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/{user_id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get a user by ID",
+        "operationId": "get_user_users__user_id__get",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Replace a user by ID",
+        "operationId": "update_user_users__user_id__put",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "Username or email is already taken by another user"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Delete a user by ID",
+        "operationId": "delete_user_users__user_id__delete",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Root status check",
+        "operationId": "root__get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Health check probe",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnnotationCreate": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Text",
+            "description": "Annotation note",
+            "examples": [
+              "Understanding determinants as scaling factors"
+            ]
+          },
+          "from_dur": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "From Dur",
+            "description": "Start timestamp in seconds",
+            "examples": [
+              0.0
+            ]
+          },
+          "to_dur": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "To Dur",
+            "description": "End timestamp in seconds",
+            "examples": [
+              159.0
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "from_dur",
+          "to_dur"
+        ],
+        "title": "AnnotationCreate"
+      },
+      "AnnotationListResponse": {
+        "properties": {
+          "annotations": {
+            "items": {
+              "$ref": "#/components/schemas/AnnotationResponse"
+            },
+            "type": "array",
+            "title": "Annotations"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          },
+          "links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Links",
+            "description": "HATEOAS pagination links",
+            "examples": [
+              {
+                "catalog": "/catalogs/1",
+                "self": "/catalogs/1/videos/1/annotations?limit=10&offset=0",
+                "video": "/catalogs/1/videos/1"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "annotations",
+          "pagination"
+        ],
+        "title": "AnnotationListResponse"
+      },
+      "AnnotationResponse": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Text",
+            "description": "Annotation note",
+            "examples": [
+              "Understanding determinants as scaling factors"
+            ]
+          },
+          "from_dur": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "From Dur",
+            "description": "Start timestamp in seconds",
+            "examples": [
+              0.0
+            ]
+          },
+          "to_dur": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "To Dur",
+            "description": "End timestamp in seconds",
+            "examples": [
+              159.0
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "video_id": {
+            "type": "integer",
+            "title": "Video Id",
+            "examples": [
+              1
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Links",
+            "description": "HATEOAS hypermedia links",
+            "examples": [
+              {
+                "catalog": "/catalogs/1",
+                "self": "/catalogs/1/videos/1/annotations/1",
+                "video": "/catalogs/1/videos/1"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "from_dur",
+          "to_dur",
+          "id",
+          "video_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "AnnotationResponse"
+      },
+      "AnnotationUpdate": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Text",
+            "description": "Annotation note",
+            "examples": [
+              "Understanding determinants as scaling factors"
+            ]
+          },
+          "from_dur": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "From Dur",
+            "description": "Start timestamp in seconds",
+            "examples": [
+              0.0
+            ]
+          },
+          "to_dur": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "To Dur",
+            "description": "End timestamp in seconds",
+            "examples": [
+              159.0
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "from_dur",
+          "to_dur"
+        ],
+        "title": "AnnotationUpdate"
+      },
+      "CatalogCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "description": "Catalog name",
+            "examples": [
+              "Linear Algebra"
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Catalog description",
+            "examples": [
+              "Essence of linear algebra and matrices."
+            ]
+          },
+          "is_public": {
+            "type": "boolean",
+            "title": "Is Public",
+            "description": "Whether the catalog is public",
+            "default": true,
+            "examples": [
+              true
+            ]
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "description": "Owner user ID (optional)",
+            "examples": [
+              1
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CatalogCreate"
+      },
+      "CatalogDashboardResponse": {
+        "properties": {
+          "catalog": {
+            "$ref": "#/components/schemas/CatalogResponse"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/CatalogDashboardStats"
+          },
+          "recent_videos": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogDashboardVideoItem"
+            },
+            "type": "array",
+            "title": "Recent Videos"
+          },
+          "links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Links",
+            "examples": [
+              {
+                "catalog": "/catalogs/1",
+                "self": "/catalogs/1/dashboard"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "catalog",
+          "stats",
+          "recent_videos"
+        ],
+        "title": "CatalogDashboardResponse"
+      },
+      "CatalogDashboardStats": {
+        "properties": {
+          "total_videos": {
+            "type": "integer",
+            "title": "Total Videos",
+            "examples": [
+              3
+            ]
+          },
+          "total_annotations": {
+            "type": "integer",
+            "title": "Total Annotations",
+            "examples": [
+              12
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_videos",
+          "total_annotations"
+        ],
+        "title": "CatalogDashboardStats"
+      },
+      "CatalogDashboardVideoItem": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "title": {
+            "type": "string",
+            "title": "Title",
+            "examples": [
+              "The determinant"
+            ]
+          },
+          "duration": {
+            "type": "number",
+            "title": "Duration",
+            "examples": [
+              620.0
+            ]
+          },
+          "annotation_count": {
+            "type": "integer",
+            "title": "Annotation Count",
+            "examples": [
+              4
+            ]
+          },
+          "links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Links",
+            "examples": [
+              {
+                "self": "/catalogs/1/videos/1"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "duration",
+          "annotation_count"
+        ],
+        "title": "CatalogDashboardVideoItem"
+      },
+      "CatalogListResponse": {
+        "properties": {
+          "catalogs": {
+            "items": {
+              "$ref": "#/components/schemas/CatalogResponse"
+            },
+            "type": "array",
+            "title": "Catalogs"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          },
+          "links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Links",
+            "description": "HATEOAS pagination links",
+            "examples": [
+              {
+                "next": "/catalogs?limit=10&offset=10",
+                "self": "/catalogs?limit=10&offset=0"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "catalogs",
+          "pagination"
+        ],
+        "title": "CatalogListResponse"
+      },
+      "CatalogResponse": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "description": "Catalog name",
+            "examples": [
+              "Linear Algebra"
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Catalog description",
+            "examples": [
+              "Essence of linear algebra and matrices."
+            ]
+          },
+          "is_public": {
+            "type": "boolean",
+            "title": "Is Public",
+            "description": "Whether the catalog is public",
+            "default": true,
+            "examples": [
+              true
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "examples": [
+              1
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Links",
+            "description": "HATEOAS hypermedia links",
+            "examples": [
+              {
+                "dashboard": "/catalogs/1/dashboard",
+                "self": "/catalogs/1",
+                "videos": "/catalogs/1/videos"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "CatalogResponse"
+      },
+      "CatalogUpdate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Name",
+            "description": "Catalog name",
+            "examples": [
+              "Linear Algebra"
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Catalog description",
+            "examples": [
+              "Essence of linear algebra and matrices."
+            ]
+          },
+          "is_public": {
+            "type": "boolean",
+            "title": "Is Public",
+            "description": "Whether the catalog is public",
+            "default": true,
+            "examples": [
+              true
+            ]
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "description": "Owner user ID (optional)",
+            "examples": [
+              1
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "CatalogUpdate"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "PaginationMeta": {
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Limit",
+            "description": "Number of items returned",
+            "examples": [
+              10
+            ]
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Offset",
+            "description": "Number of items skipped",
+            "examples": [
+              0
+            ]
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total",
+            "description": "Total number of matching items",
+            "examples": [
+              25
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "limit",
+          "offset",
+          "total"
+        ],
+        "title": "PaginationMeta"
+      },
+      "UserCreate": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 3,
+            "title": "Username",
+            "description": "Unique username",
+            "examples": [
+              "adomas"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Unique email address",
+            "examples": [
+              "adomas@example.com"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "guest",
+              "member",
+              "admin"
+            ],
+            "title": "Role",
+            "description": "User role ('guest', 'member', 'admin')",
+            "default": "member",
+            "examples": [
+              "admin"
+            ]
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 6,
+            "title": "Password",
+            "description": "User password",
+            "examples": [
+              "secretpassword123"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "email",
+          "password"
+        ],
+        "title": "UserCreate"
+      },
+      "UserListResponse": {
+        "properties": {
+          "users": {
+            "items": {
+              "$ref": "#/components/schemas/UserResponse"
+            },
+            "type": "array",
+            "title": "Users"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          },
+          "links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Links",
+            "description": "HATEOAS pagination links",
+            "examples": [
+              {
+                "self": "/users?limit=10&offset=0"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "users",
+          "pagination"
+        ],
+        "title": "UserListResponse"
+      },
+      "UserResponse": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 3,
+            "title": "Username",
+            "description": "Unique username",
+            "examples": [
+              "adomas"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "description": "Unique email address",
+            "examples": [
+              "adomas@example.com"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "guest",
+              "member",
+              "admin"
+            ],
+            "title": "Role",
+            "description": "User role ('guest', 'member', 'admin')",
+            "default": "member",
+            "examples": [
+              "admin"
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Links",
+            "description": "HATEOAS hypermedia links",
+            "examples": [
+              {
+                "self": "/users/1"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "email",
+          "id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "UserResponse"
+      },
+      "UserUpdate": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 3,
+            "title": "Username",
+            "examples": [
+              "adomas"
+            ]
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email",
+            "examples": [
+              "adomas@example.com"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "guest",
+              "member",
+              "admin"
+            ],
+            "title": "Role",
+            "default": "member",
+            "examples": [
+              "admin"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "username",
+          "email"
+        ],
+        "title": "UserUpdate"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VideoCreate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title",
+            "description": "Video title",
+            "examples": [
+              "The determinant | Chapter 6, Essence of linear algebra"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Url",
+            "description": "Video URL",
+            "examples": [
+              "https://youtu.be/Ip3X9LOh2dk"
+            ]
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Duration",
+            "description": "Video duration in seconds",
+            "default": 0.0,
+            "examples": [
+              620.0
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Optional video description",
+            "examples": [
+              "The determinant measures how much areas and volumes scale during a transformation."
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "url"
+        ],
+        "title": "VideoCreate"
+      },
+      "VideoListResponse": {
+        "properties": {
+          "videos": {
+            "items": {
+              "$ref": "#/components/schemas/VideoResponse"
+            },
+            "type": "array",
+            "title": "Videos"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationMeta"
+          },
+          "links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Links",
+            "description": "HATEOAS pagination links",
+            "examples": [
+              {
+                "catalog": "/catalogs/1",
+                "self": "/catalogs/1/videos?limit=10&offset=0"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "videos",
+          "pagination"
+        ],
+        "title": "VideoListResponse"
+      },
+      "VideoResponse": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title",
+            "description": "Video title",
+            "examples": [
+              "The determinant | Chapter 6, Essence of linear algebra"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Url",
+            "description": "Video URL",
+            "examples": [
+              "https://youtu.be/Ip3X9LOh2dk"
+            ]
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Duration",
+            "description": "Video duration in seconds",
+            "default": 0.0,
+            "examples": [
+              620.0
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Optional video description",
+            "examples": [
+              "The determinant measures how much areas and volumes scale during a transformation."
+            ]
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "examples": [
+              1
+            ]
+          },
+          "catalog_id": {
+            "type": "integer",
+            "title": "Catalog Id",
+            "examples": [
+              1
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At"
+          },
+          "links": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Links",
+            "description": "HATEOAS hypermedia links",
+            "examples": [
+              {
+                "annotations": "/catalogs/1/videos/1/annotations",
+                "catalog": "/catalogs/1",
+                "self": "/catalogs/1/videos/1"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "url",
+          "id",
+          "catalog_id",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "VideoResponse"
+      },
+      "VideoUpdate": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 255,
+            "minLength": 1,
+            "title": "Title",
+            "description": "Video title",
+            "examples": [
+              "The determinant | Chapter 6, Essence of linear algebra"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Url",
+            "description": "Video URL",
+            "examples": [
+              "https://youtu.be/Ip3X9LOh2dk"
+            ]
+          },
+          "duration": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Duration",
+            "description": "Video duration in seconds",
+            "default": 0.0,
+            "examples": [
+              620.0
+            ]
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "Optional video description",
+            "examples": [
+              "The determinant measures how much areas and volumes scale during a transformation."
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "title",
+          "url"
+        ],
+        "title": "VideoUpdate"
+      }
+    }
+  }
+}

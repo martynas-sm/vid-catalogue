@@ -1,0 +1,31 @@
+meta {
+  name: 422 Unprocessable Entity - Validation Error
+  type: http
+  seq: 4
+  tags: [
+    Errors
+  ]
+}
+
+post {
+  url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id/annotations
+  body: json
+  auth: inherit
+}
+
+params:path {
+  catalog_id: 1
+  video_id: 1
+}
+
+body:json {
+  {
+    "text": "Invalid interval annotation",
+    "from_dur": 300.0,
+    "to_dur": 100.0
+  }
+}
+
+docs {
+  Demonstrates 422 Unprocessable Entity when request fails schema validation (to_dur <= from_dur).
+}

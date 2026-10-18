@@ -1,0 +1,117 @@
+meta {
+  name: List catalogs with pagination and filtering
+  type: http
+  seq: 1
+  tags: [
+    Catalogs
+  ]
+}
+
+get {
+  url: {{baseUrl}}/catalogs
+  body: none
+  auth: inherit
+}
+
+params:query {
+  limit: 10
+  offset: 0
+  ~name: Algebra
+}
+
+example {
+  name: 200 Response
+  description: Successful Response
+  
+  request: {
+    url: {{baseUrl}}/catalogs
+    method: GET
+    mode: none
+    params:query: {
+      limit: 10
+      offset: 0
+      ~name: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "catalogs": [
+            {
+              "name": "",
+              "description": "",
+              "is_public": false,
+              "id": 0,
+              "user_id": "",
+              "created_at": "",
+              "updated_at": "",
+              "links": {}
+            }
+          ],
+          "pagination": {
+            "limit": 0,
+            "offset": 0,
+            "total": 0
+          },
+          "links": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 Response
+  description: Validation Error
+  
+  request: {
+    url: {{baseUrl}}/catalogs
+    method: GET
+    mode: none
+    params:query: {
+      limit: 10
+      offset: 0
+      ~name: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": [
+            {
+              "loc": [],
+              "msg": "",
+              "type": "",
+              "input": "",
+              "ctx": {}
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,169 @@
+meta {
+  name: Replace an annotation by ID
+  type: http
+  seq: 4
+  tags: [
+    Annotations
+  ]
+}
+
+put {
+  url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id/annotations/:annotation_id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  catalog_id: 1
+  video_id: 1
+  annotation_id: 1
+}
+
+body:json {
+  {
+    "text": "Understanding determinants: visual scaling factor and orientation",
+    "from_dur": 0.0,
+    "to_dur": 159.0
+  }
+}
+
+example {
+  name: 200 Response
+  description: Successful Response
+  
+  request: {
+    url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id/annotations/:annotation_id
+    method: PUT
+    mode: json
+    params:path: {
+      catalog_id: 
+      video_id: 
+      annotation_id: 
+    }
+  
+    body:json: {
+      {
+        "text": "",
+        "from_dur": 0,
+        "to_dur": 0
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "text": "",
+          "from_dur": 0,
+          "to_dur": 0,
+          "id": 0,
+          "video_id": 0,
+          "created_at": "",
+          "updated_at": "",
+          "links": {}
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Annotation not found in scoped video
+  
+  request: {
+    url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id/annotations/:annotation_id
+    method: PUT
+    mode: json
+    params:path: {
+      catalog_id: 
+      video_id: 
+      annotation_id: 
+    }
+  
+    body:json: {
+      {
+        "text": "",
+        "from_dur": 0,
+        "to_dur": 0
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 Response
+  description: Validation Error
+  
+  request: {
+    url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id/annotations/:annotation_id
+    method: PUT
+    mode: json
+    params:path: {
+      catalog_id: 
+      video_id: 
+      annotation_id: 
+    }
+  
+    body:json: {
+      {
+        "text": "",
+        "from_dur": 0,
+        "to_dur": 0
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": [
+            {
+              "loc": [],
+              "msg": "",
+              "type": "",
+              "input": "",
+              "ctx": {}
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

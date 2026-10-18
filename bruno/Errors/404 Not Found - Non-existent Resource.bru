@@ -1,0 +1,22 @@
+meta {
+  name: 404 Not Found - Non-existent Resource
+  type: http
+  seq: 1
+  tags: [
+    Errors
+  ]
+}
+
+get {
+  url: {{baseUrl}}/catalogs/:catalog_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  catalog_id: 9999
+}
+
+docs {
+  Demonstrates 404 Not Found error handling when querying a non-existent entity.
+}

@@ -1,0 +1,124 @@
+meta {
+  name: Delete an annotation by ID
+  type: http
+  seq: 5
+  tags: [
+    Annotations
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id/annotations/:annotation_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  catalog_id: 1
+  video_id: 1
+  annotation_id: 4
+}
+
+example {
+  name: 204 Response
+  description: Successful Response
+  
+  request: {
+    url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id/annotations/:annotation_id
+    method: DELETE
+    mode: none
+    params:path: {
+      catalog_id: 
+      video_id: 
+      annotation_id: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Annotation not found in scoped video
+  
+  request: {
+    url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id/annotations/:annotation_id
+    method: DELETE
+    mode: none
+    params:path: {
+      catalog_id: 
+      video_id: 
+      annotation_id: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 Response
+  description: Validation Error
+  
+  request: {
+    url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id/annotations/:annotation_id
+    method: DELETE
+    mode: none
+    params:path: {
+      catalog_id: 
+      video_id: 
+      annotation_id: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": [
+            {
+              "loc": [],
+              "msg": "",
+              "type": "",
+              "input": "",
+              "ctx": {}
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
