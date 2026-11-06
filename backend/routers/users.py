@@ -5,7 +5,6 @@ from database import get_db
 from models import User
 from schemas.common import make_pagination_links
 from schemas.user import (
-    UserCreate,
     UserListResponse,
     UserResponse,
     UserUpdate,
@@ -53,55 +52,6 @@ def get_users(
         ],
         "pagination": {"limit": limit, "offset": offset, "total": total},
         "links": pagination_links,
-    }
-
-
-@router.post(
-    "/users",
-    response_model=UserResponse,
-    status_code=status.HTTP_201_CREATED,
-    summary="Create a new user",
-    responses={
-        201: {
-            "description": "User created successfully",
-            "headers": {
-                "Location": {
-                    "description": "URI of the created user resource",
-                    "schema": {"type": "string"},
-                }
-            },
-        },
-        409: {"description": "User with this username or email already exists"},
-    },
-)
-def create_user(payload: UserCreate, response: Response, db: Session = Depends(get_db)):
-    existing = (
-        db.query(User)
-        .filter((User.username == payload.username) | (User.email == payload.email))
-        .first()
-    )
-    if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="User with this username or email already exists",
-        )
-
-    user = User(
-        username=payload.username,
-        email=payload.email,
-        hashed_password=f"hashed_{payload.password}",
-        role=payload.role,
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    location = f"/users/{user.id}"
-    response.headers["Location"] = location
-
-    return {
-        **user.to_dict(),
-        "links": make_user_links(user.id),
     }
 
 

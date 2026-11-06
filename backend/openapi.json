@@ -1037,56 +1037,6 @@
             }
           }
         }
-      },
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "summary": "Create a new user",
-        "operationId": "create_user_users_post",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UserCreate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "User created successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/UserResponse"
-                }
-              }
-            },
-            "headers": {
-              "Location": {
-                "description": "URI of the created user resource",
-                "schema": {
-                  "type": "string"
-                }
-              }
-            }
-          },
-          "409": {
-            "description": "User with this username or email already exists"
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/users/{user_id}": {
@@ -1220,25 +1170,6 @@
                 "schema": {
                   "$ref": "#/components/schemas/HTTPValidationError"
                 }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/": {
-      "get": {
-        "tags": [
-          "System"
-        ],
-        "summary": "Root status check",
-        "operationId": "root__get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
               }
             }
           }
@@ -1867,60 +1798,6 @@
           "total"
         ],
         "title": "PaginationMeta"
-      },
-      "UserCreate": {
-        "properties": {
-          "username": {
-            "type": "string",
-            "maxLength": 50,
-            "minLength": 3,
-            "title": "Username",
-            "description": "Unique username",
-            "examples": [
-              "adomas"
-            ]
-          },
-          "email": {
-            "type": "string",
-            "format": "email",
-            "title": "Email",
-            "description": "Unique email address",
-            "examples": [
-              "adomas@example.com"
-            ]
-          },
-          "role": {
-            "type": "string",
-            "enum": [
-              "guest",
-              "member",
-              "admin"
-            ],
-            "title": "Role",
-            "description": "User role ('guest', 'member', 'admin')",
-            "default": "member",
-            "examples": [
-              "admin"
-            ]
-          },
-          "password": {
-            "type": "string",
-            "maxLength": 100,
-            "minLength": 6,
-            "title": "Password",
-            "description": "User password",
-            "examples": [
-              "secretpassword123"
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "username",
-          "email",
-          "password"
-        ],
-        "title": "UserCreate"
       },
       "UserListResponse": {
         "properties": {

@@ -26,16 +26,6 @@ class UserBase(BaseModel):
     )
 
 
-class UserCreate(UserBase):
-    password: str = Field(
-        ...,
-        min_length=6,
-        max_length=100,
-        description="User password",
-        examples=["secretpassword123"],
-    )
-
-
 class UserUpdate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50, examples=["adomas"])
     email: EmailStr = Field(..., examples=["adomas@example.com"])

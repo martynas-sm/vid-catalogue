@@ -31,11 +31,6 @@ app.include_router(annotations.router, tags=["Annotations"])
 app.include_router(users.router, tags=["Users"])
 
 
-@app.get("/", tags=["System"], summary="Root status check")
-async def root():
-    return {"message": "Hello World"}
-
-
 @app.get("/health", tags=["System"], summary="Health check probe")
 async def health():
     return {"status": "healthy"}

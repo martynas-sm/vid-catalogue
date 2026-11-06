@@ -15,7 +15,6 @@ from schemas.catalog import (
 )
 from schemas.common import PaginationMeta
 from schemas.user import (
-    UserCreate,
     UserListResponse,
     UserResponse,
     UserUpdate,
@@ -44,7 +43,6 @@ __all__ = [
     "CatalogDashboardResponse",
     "CatalogDashboardStats",
     "CatalogDashboardVideoItem",
-    "UserCreate",
     "UserUpdate",
     "UserResponse",
     "UserListResponse",
