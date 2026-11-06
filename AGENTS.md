@@ -20,4 +20,4 @@ Agents should use red-teaming, pre-mortem, and first-principles decomposition to
 `./task/modulio-skaidres.md` slides for this module task, not well formatted
 `./backend` is the Python FastAPI backend
 
-Current stage: working on lab 1
+Current stage: working on lab 2
