@@ -14,7 +14,6 @@ from auth.security import (
     create_refresh_token,
     decode_access_token,
     hash_password,
-    verify_dummy_password,
     verify_password,
 )
 from auth.totp import (
@@ -98,15 +97,7 @@ def _authenticate_and_issue_tokens(
     db: Session,
 ) -> TokenResponse:
     user = db.query(User).filter(User.username == username).first()
-    if user is None:
-        verify_dummy_password()
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
-    if not verify_password(password, user.hashed_password):
+    if user is None or not verify_password(password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
