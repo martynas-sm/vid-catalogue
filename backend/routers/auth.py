@@ -3,6 +3,7 @@
 from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -90,20 +91,13 @@ def register(
     )
 
 
-@router.post(
-    "/login",
-    response_model=TokenResponse,
-    status_code=status.HTTP_200_OK,
-    summary="Authenticate user and issue access and refresh tokens",
-    responses={
-        401: {"description": "Invalid credentials or missing/invalid 2FA code"},
-    },
-)
-def login(
-    payload: UserLoginRequest,
-    db: Session = Depends(get_db),
-):
-    user = db.query(User).filter(User.username == payload.username).first()
+def _authenticate_and_issue_tokens(
+    username: str,
+    password: str,
+    totp_code: str | None,
+    db: Session,
+) -> TokenResponse:
+    user = db.query(User).filter(User.username == username).first()
     if user is None:
         verify_dummy_password()
         raise HTTPException(
@@ -112,7 +106,7 @@ def login(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    if not verify_password(payload.password, user.hashed_password):
+    if not verify_password(password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid credentials",
@@ -120,8 +114,8 @@ def login(
         )
 
     if user.is_totp_enabled:
-        if not payload.totp_code or not verify_totp_code(
-            user.totp_secret, payload.totp_code
+        if not totp_code or not verify_totp_code(
+            user.totp_secret, totp_code
         ):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -146,6 +140,48 @@ def login(
         access_token=access_token,
         refresh_token=raw_refresh_token,
         token_type="bearer",
+    )
+
+
+@router.post(
+    "/token",
+    response_model=TokenResponse,
+    status_code=status.HTTP_200_OK,
+    summary="OAuth2 password flow token endpoint for Swagger UI authorization",
+    responses={
+        401: {"description": "Invalid credentials or missing/invalid 2FA code"},
+    },
+)
+def token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+):
+    return _authenticate_and_issue_tokens(
+        username=form_data.username,
+        password=form_data.password,
+        totp_code=None,
+        db=db,
+    )
+
+
+@router.post(
+    "/login",
+    response_model=TokenResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Authenticate user and issue access and refresh tokens (JSON)",
+    responses={
+        401: {"description": "Invalid credentials or missing/invalid 2FA code"},
+    },
+)
+def login(
+    payload: UserLoginRequest,
+    db: Session = Depends(get_db),
+):
+    return _authenticate_and_issue_tokens(
+        username=payload.username,
+        password=payload.password,
+        totp_code=payload.totp_code,
+        db=db,
     )
 
 

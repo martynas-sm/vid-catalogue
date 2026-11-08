@@ -9,6 +9,8 @@ from sqlalchemy.exc import IntegrityError
 def _sanitize_for_json(val):
     if isinstance(val, (Exception, type)):
         return str(val)
+    if isinstance(val, (bytes, bytearray)):
+        return val.decode("utf-8", errors="replace")
     if isinstance(val, dict):
         return {k: _sanitize_for_json(v) for k, v in val.items()}
     if isinstance(val, (list, tuple)):
