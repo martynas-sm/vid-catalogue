@@ -21,6 +21,10 @@ body:json {
   }
 }
 
+vars:post-response {
+  registered_user_id: res.body.id
+}
+
 assert {
   res.status: eq 201
   res.body.id: isDefined

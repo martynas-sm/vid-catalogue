@@ -1,5 +1,5 @@
 meta {
-  name: 05 - Member Creates Catalog
+  name: 05 - Creator Creates Catalog
   type: http
   seq: 5
   tags: [
@@ -19,7 +19,7 @@ headers {
 
 body:json {
   {
-    "name": "Member Exclusive Catalog",
+    "name": "Creator Exclusive Catalog",
     "description": "Created by martynas to test resource ownership",
     "is_public": true
   }
@@ -35,5 +35,5 @@ assert {
 }
 
 docs {
-  Member creates a new catalog. The system binds resource ownership to the authenticated user.
+  Creator creates a new catalog. The system binds resource ownership to the authenticated user.
 }

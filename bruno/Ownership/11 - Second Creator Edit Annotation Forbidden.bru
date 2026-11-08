@@ -1,5 +1,5 @@
 meta {
-  name: 11 - Second Member Edit Annotation Forbidden
+  name: 11 - Second Creator Edit Annotation Forbidden
   type: http
   seq: 11
   tags: [
@@ -20,7 +20,7 @@ params:path {
 }
 
 headers {
-  Authorization: Bearer {{second_member_token}}
+  Authorization: Bearer {{second_creator_token}}
 }
 
 body:json {
@@ -36,5 +36,5 @@ assert {
 }
 
 docs {
-  Non-owner member attempts to edit annotation owned by another member, expecting HTTP 403 Forbidden.
+  Non-owner creator attempts to edit annotation owned by another creator, expecting HTTP 403 Forbidden.
 }

@@ -1,0 +1,40 @@
+meta {
+  name: Replace a user by ID
+  type: http
+  seq: 3
+  tags: [
+    Users
+  ]
+}
+
+put {
+  url: {{baseUrl}}/users/:user_id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  user_id: 3
+}
+
+headers {
+  Authorization: Bearer {{admin_token}}
+}
+
+body:json {
+  {
+    "username": "viewer_user",
+    "email": "viewer_updated@example.com",
+    "role": "viewer"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.id: eq 3
+  res.body.email: eq viewer_updated@example.com
+}
+
+docs {
+  Replaces a user's details and role by primary key ID. Restricted to admin.
+}

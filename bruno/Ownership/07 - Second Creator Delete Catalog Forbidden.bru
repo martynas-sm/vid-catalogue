@@ -1,5 +1,5 @@
 meta {
-  name: 07 - Second Member Delete Catalog Forbidden
+  name: 07 - Second Creator Delete Catalog Forbidden
   type: http
   seq: 7
   tags: [
@@ -18,7 +18,7 @@ params:path {
 }
 
 headers {
-  Authorization: Bearer {{second_member_token}}
+  Authorization: Bearer {{second_creator_token}}
 }
 
 assert {
@@ -26,5 +26,5 @@ assert {
 }
 
 docs {
-  Non-owner member attempts to delete catalog owned by another member, expecting HTTP 403 Forbidden.
+  Non-owner creator attempts to delete catalog owned by another creator, expecting HTTP 403 Forbidden.
 }

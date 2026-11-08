@@ -1,9 +1,9 @@
 meta {
-  name: Login Guest
+  name: 03 - Setup - Login Second Creator
   type: http
-  seq: 4
+  seq: 3
   tags: [
-    Auth
+    Ownership
   ]
 }
 
@@ -15,22 +15,20 @@ post {
 
 body:json {
   {
-    "username": "guest_user",
+    "username": "second_creator",
     "password": "Password123!"
   }
 }
 
 vars:post-response {
-  viewer_token: res.body.access_token
-  guest_token: res.body.access_token
+  second_creator_token: res.body.access_token
 }
 
 assert {
   res.status: eq 200
   res.body.access_token: isDefined
-  res.body.token_type: eq bearer
 }
 
 docs {
-  Authenticates guest role user 'guest_user' and stores guest_token.
+  Logs in secondary creator 'second_creator' and captures second_creator_token.
 }

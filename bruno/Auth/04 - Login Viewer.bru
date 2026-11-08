@@ -1,9 +1,9 @@
 meta {
-  name: 03 - Setup - Login Second Member
+  name: Login Viewer
   type: http
-  seq: 3
+  seq: 4
   tags: [
-    Ownership
+    Auth
   ]
 }
 
@@ -15,20 +15,21 @@ post {
 
 body:json {
   {
-    "username": "second_member",
+    "username": "viewer_user",
     "password": "Password123!"
   }
 }
 
 vars:post-response {
-  second_member_token: res.body.access_token
+  viewer_token: res.body.access_token
 }
 
 assert {
   res.status: eq 200
   res.body.access_token: isDefined
+  res.body.token_type: eq bearer
 }
 
 docs {
-  Logs in secondary member 'second_member' and captures second_member_token.
+  Authenticates viewer role user 'viewer_user' and stores viewer_token.
 }

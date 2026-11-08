@@ -1,5 +1,5 @@
 meta {
-  name: 01 - Setup - Register Second Member
+  name: 01 - Setup - Register Second Creator
   type: http
   seq: 1
   tags: [
@@ -15,8 +15,8 @@ post {
 
 body:json {
   {
-    "username": "second_member",
-    "email": "second_member@example.com",
+    "username": "second_creator",
+    "email": "second_creator@example.com",
     "password": "Password123!"
   }
 }
@@ -26,5 +26,5 @@ assert {
 }
 
 docs {
-  Registers a secondary member user for non-owner permission testing.
+  Registers a secondary creator user for non-owner permission testing.
 }

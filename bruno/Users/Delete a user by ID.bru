@@ -1,0 +1,30 @@
+meta {
+  name: Delete a user by ID
+  type: http
+  seq: 4
+  tags: [
+    Users
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/users/:user_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  user_id: {{registered_user_id}}
+}
+
+headers {
+  Authorization: Bearer {{admin_token}}
+}
+
+assert {
+  res.status: in [200, 204, 404]
+}
+
+docs {
+  Deletes a user by primary key ID (deletes the newly registered test user). Restricted to admin.
+}

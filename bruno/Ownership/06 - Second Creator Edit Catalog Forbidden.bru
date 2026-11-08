@@ -1,5 +1,5 @@
 meta {
-  name: 06 - Second Member Edit Catalog Forbidden
+  name: 06 - Second Creator Edit Catalog Forbidden
   type: http
   seq: 6
   tags: [
@@ -18,13 +18,13 @@ params:path {
 }
 
 headers {
-  Authorization: Bearer {{second_member_token}}
+  Authorization: Bearer {{second_creator_token}}
 }
 
 body:json {
   {
     "name": "Tampered Catalog Name",
-    "description": "Unauthorized update attempt by non-owner member",
+    "description": "Unauthorized update attempt by non-owner creator",
     "is_public": true
   }
 }
@@ -34,5 +34,5 @@ assert {
 }
 
 docs {
-  Non-owner member attempts to edit catalog owned by another member, expecting HTTP 403 Forbidden.
+  Non-owner creator attempts to edit catalog owned by another creator, expecting HTTP 403 Forbidden.
 }

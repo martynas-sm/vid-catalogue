@@ -1,0 +1,34 @@
+meta {
+  name: List users with pagination and filtering
+  type: http
+  seq: 1
+  tags: [
+    Users
+  ]
+}
+
+get {
+  url: {{baseUrl}}/users
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{admin_token}}
+}
+
+params:query {
+  limit: 10
+  offset: 0
+  ~username: adomas
+}
+
+assert {
+  res.status: eq 200
+  res.body.users: isDefined
+  res.body.pagination: isDefined
+}
+
+docs {
+  Lists registered users with pagination and optional username substring filtering. Restricted to admin.
+}

@@ -1,0 +1,32 @@
+meta {
+  name: Get a user by ID
+  type: http
+  seq: 2
+  tags: [
+    Users
+  ]
+}
+
+get {
+  url: {{baseUrl}}/users/:user_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  user_id: 1
+}
+
+headers {
+  Authorization: Bearer {{admin_token}}
+}
+
+assert {
+  res.status: eq 200
+  res.body.id: eq 1
+  res.body.role: eq admin
+}
+
+docs {
+  Retrieves user details by primary key ID. Restricted to admin.
+}

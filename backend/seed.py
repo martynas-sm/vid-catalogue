@@ -29,20 +29,6 @@ def seed_users(db):
             "role": "viewer",
             "is_totp_enabled": False,
         },
-        {
-            "username": "guest_user",
-            "email": "guest@example.com",
-            "hashed_password": hash_password("Password123!"),
-            "role": "viewer",
-            "is_totp_enabled": False,
-        },
-        {
-            "username": "viewer",
-            "email": "viewer_alias@example.com",
-            "hashed_password": hash_password("Password123!"),
-            "role": "viewer",
-            "is_totp_enabled": False,
-        },
     ]
     users = [User(**u) for u in users_data]
     db.add_all(users)
