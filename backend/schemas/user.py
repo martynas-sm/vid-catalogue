@@ -19,9 +19,9 @@ class UserBase(BaseModel):
         description="Unique email address",
         examples=["adomas@example.com"],
     )
-    role: Literal["guest", "member", "admin"] = Field(
-        default="member",
-        description="User role ('guest', 'member', 'admin')",
+    role: Literal["viewer", "creator", "admin"] = Field(
+        default="creator",
+        description="User role ('viewer', 'creator', 'admin')",
         examples=["admin"],
     )
 
@@ -29,8 +29,8 @@ class UserBase(BaseModel):
 class UserUpdate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50, examples=["adomas"])
     email: EmailStr = Field(..., examples=["adomas@example.com"])
-    role: Literal["guest", "member", "admin"] = Field(
-        default="member", examples=["admin"]
+    role: Literal["viewer", "creator", "admin"] = Field(
+        default="creator", examples=["admin"]
     )
 
 

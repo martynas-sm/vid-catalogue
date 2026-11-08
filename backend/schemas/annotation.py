@@ -44,6 +44,11 @@ class AnnotationUpdate(AnnotationBase):
 class AnnotationResponse(AnnotationBase):
     id: int = Field(..., examples=[1])
     video_id: int = Field(..., examples=[1])
+    user_id: int | None = Field(
+        default=None,
+        description="Author user ID (ownership)",
+        examples=[1],
+    )
     created_at: datetime
     updated_at: datetime
     links: dict[str, str] = Field(

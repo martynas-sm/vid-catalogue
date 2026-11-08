@@ -4,6 +4,15 @@ from schemas.annotation import (
     AnnotationResponse,
     AnnotationUpdate,
 )
+from schemas.auth import (
+    TokenRefreshRequest,
+    TokenRefreshResponse,
+    TokenResponse,
+    TOTPSetupResponse,
+    TOTPVerifyRequest,
+    UserLoginRequest,
+    UserRegisterRequest,
+)
 from schemas.catalog import (
     CatalogCreate,
     CatalogDashboardResponse,
@@ -46,4 +55,11 @@ __all__ = [
     "UserUpdate",
     "UserResponse",
     "UserListResponse",
+    "UserRegisterRequest",
+    "UserLoginRequest",
+    "TokenResponse",
+    "TokenRefreshRequest",
+    "TokenRefreshResponse",
+    "TOTPSetupResponse",
+    "TOTPVerifyRequest",
 ]

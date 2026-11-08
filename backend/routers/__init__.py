@@ -1,3 +1,3 @@
-from routers import annotations, catalogs, users, videos
+from routers import annotations, auth, catalogs, users, videos
 
-__all__ = ["annotations", "catalogs", "users", "videos"]
+__all__ = ["annotations", "auth", "catalogs", "users", "videos"]

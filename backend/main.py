@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from database import engine
 from exceptions import register_exception_handlers
 from models import Base
-from routers import annotations, catalogs, users, videos
+from routers import annotations, auth, catalogs, users, videos
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI(
@@ -25,6 +25,7 @@ register_exception_handlers(app)
 
 
 # Router structure from: https://fastapi.tiangolo.com/tutorial/bigger-applications/
+app.include_router(auth.router, prefix="/auth", tags=["Authentication"])
 app.include_router(catalogs.router, tags=["Catalogs"])
 app.include_router(videos.router, tags=["Videos"])
 app.include_router(annotations.router, tags=["Annotations"])

@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
+from auth.dependencies import get_current_user, get_owned_annotation
 from database import get_db
-from models import Annotation, Catalog, Video
+from models import Annotation, Catalog, User, Video
 from schemas.annotation import (
     AnnotationCreate,
     AnnotationListResponse,
@@ -112,13 +113,16 @@ def create_annotation(
     video_id: int,
     payload: AnnotationCreate,
     response: Response,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     catalog_and_video_guard(catalog_id, video_id, db)
 
+    annotation_data = payload.model_dump()
+    annotation_data["user_id"] = current_user.id
     annotation = Annotation(
         video_id=video_id,
-        **payload.model_dump(),
+        **annotation_data,
     )
     db.add(annotation)
     db.commit()
@@ -164,24 +168,18 @@ def get_annotation(
     "/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}",
     response_model=AnnotationResponse,
     summary="Replace an annotation by ID",
-    responses={404: {"description": "Annotation not found in scoped video"}},
+    responses={
+        403: {"description": "Forbidden: You do not own this annotation"},
+        404: {"description": "Annotation not found in scoped video"},
+    },
 )
 def update_annotation(
     catalog_id: int,
     video_id: int,
-    annotation_id: int,
     payload: AnnotationUpdate,
+    annotation: Annotation = Depends(get_owned_annotation),
     db: Session = Depends(get_db),
 ):
-    catalog_and_video_guard(catalog_id, video_id, db)
-
-    annotation = db.get(Annotation, annotation_id)
-    if annotation is None or annotation.video_id != video_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Annotation with id {annotation_id} not found for video {video_id}",
-        )
-
     annotation.text = payload.text
     annotation.from_dur = payload.from_dur
     annotation.to_dur = payload.to_dur
@@ -199,23 +197,15 @@ def update_annotation(
     "/catalogs/{catalog_id}/videos/{video_id}/annotations/{annotation_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete an annotation by ID",
-    responses={404: {"description": "Annotation not found in scoped video"}},
+    responses={
+        403: {"description": "Forbidden: You do not own this annotation"},
+        404: {"description": "Annotation not found in scoped video"},
+    },
 )
 def delete_annotation(
-    catalog_id: int,
-    video_id: int,
-    annotation_id: int,
+    annotation: Annotation = Depends(get_owned_annotation),
     db: Session = Depends(get_db),
 ):
-    catalog_and_video_guard(catalog_id, video_id, db)
-
-    annotation = db.get(Annotation, annotation_id)
-    if annotation is None or annotation.video_id != video_id:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Annotation with id {annotation_id} not found for video {video_id}",
-        )
-
     db.delete(annotation)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
+from auth.dependencies import require_role
 from database import get_db
 from models import User
 from schemas.common import make_pagination_links
@@ -10,7 +11,7 @@ from schemas.user import (
     UserUpdate,
 )
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_role("admin"))])
 
 
 def make_user_links(user_id: int) -> dict[str, str]:

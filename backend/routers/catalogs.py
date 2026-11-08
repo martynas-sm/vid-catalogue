@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy.orm import Session
 
+from auth.dependencies import get_current_user, get_owned_catalog, require_role
 from database import get_db
 from models import Annotation, Catalog, User, Video
 from schemas.catalog import (
@@ -32,6 +33,7 @@ def get_catalogs(
     limit: int = Query(10, ge=1, le=100),
     offset: int = Query(0, ge=0),
     name: str | None = None,
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     query = db.query(Catalog)
@@ -76,19 +78,18 @@ def get_catalogs(
                 }
             },
         },
-        400: {"description": "Referenced user does not exist"},
+        403: {"description": "Forbidden: Insufficient role permissions"},
     },
 )
 def create_catalog(
-    payload: CatalogCreate, response: Response, db: Session = Depends(get_db)
+    payload: CatalogCreate,
+    response: Response,
+    current_user: User = Depends(require_role("admin", "creator")),
+    db: Session = Depends(get_db),
 ):
-    if payload.user_id is not None and not db.get(User, payload.user_id):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Referenced user with id {payload.user_id} does not exist",
-        )
-
-    catalog = Catalog(**payload.model_dump())
+    catalog_data = payload.model_dump()
+    catalog_data["user_id"] = current_user.id
+    catalog = Catalog(**catalog_data)
     db.add(catalog)
     db.commit()
     db.refresh(catalog)
@@ -127,30 +128,18 @@ def get_catalog(catalog_id: int, db: Session = Depends(get_db)):
     response_model=CatalogResponse,
     summary="Replace a catalog by ID",
     responses={
-        400: {"description": "Referenced user does not exist"},
+        403: {"description": "Forbidden: You do not own this catalog"},
         404: {"description": "Catalog not found"},
     },
 )
 def update_catalog(
-    catalog_id: int, payload: CatalogUpdate, db: Session = Depends(get_db)
+    payload: CatalogUpdate,
+    catalog: Catalog = Depends(get_owned_catalog),
+    db: Session = Depends(get_db),
 ):
-    catalog = db.get(Catalog, catalog_id)
-    if catalog is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Catalog with id {catalog_id} not found",
-        )
-
-    if payload.user_id is not None and not db.get(User, payload.user_id):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Referenced user with id {payload.user_id} does not exist",
-        )
-
     catalog.name = payload.name
     catalog.description = payload.description
     catalog.is_public = payload.is_public
-    catalog.user_id = payload.user_id
 
     db.commit()
     db.refresh(catalog)
@@ -165,15 +154,15 @@ def update_catalog(
     "/catalogs/{catalog_id}",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="Delete a catalog by ID",
-    responses={404: {"description": "Catalog not found"}},
+    responses={
+        403: {"description": "Forbidden: You do not own this catalog"},
+        404: {"description": "Catalog not found"},
+    },
 )
-def delete_catalog(catalog_id: int, db: Session = Depends(get_db)):
-    catalog = db.get(Catalog, catalog_id)
-    if catalog is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Catalog with id {catalog_id} not found",
-        )
+def delete_catalog(
+    catalog: Catalog = Depends(get_owned_catalog),
+    db: Session = Depends(get_db),
+):
     db.delete(catalog)
     db.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
