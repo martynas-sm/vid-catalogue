@@ -1,0 +1,35 @@
+meta {
+  name: 403 Forbidden - Viewer Catalog Creation
+  type: http
+  seq: 8
+  tags: [
+    Errors
+  ]
+}
+
+post {
+  url: {{baseUrl}}/catalogs
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{viewer_token}}
+}
+
+body:json {
+  {
+    "name": "Viewer Forbidden Catalog",
+    "description": "Viewer cannot create catalogs",
+    "is_public": true
+  }
+}
+
+assert {
+  res.status: eq 403
+  res.body.detail: contains Forbidden
+}
+
+docs {
+  Demonstrates 403 Forbidden when an authenticated user with role 'viewer' attempts to create a catalog (restricted to 'admin' and 'creator').
+}

@@ -1,0 +1,39 @@
+meta {
+  name: 05 - Member Creates Catalog
+  type: http
+  seq: 5
+  tags: [
+    Ownership
+  ]
+}
+
+post {
+  url: {{baseUrl}}/catalogs
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{owner_token}}
+}
+
+body:json {
+  {
+    "name": "Member Exclusive Catalog",
+    "description": "Created by martynas to test resource ownership",
+    "is_public": true
+  }
+}
+
+vars:post-response {
+  owned_catalog_id: res.body.id
+}
+
+assert {
+  res.status: eq 201
+  res.body.id: isDefined
+}
+
+docs {
+  Member creates a new catalog. The system binds resource ownership to the authenticated user.
+}

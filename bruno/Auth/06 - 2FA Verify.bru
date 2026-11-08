@@ -1,0 +1,32 @@
+meta {
+  name: 2FA Verify
+  type: http
+  seq: 6
+  tags: [
+    Auth
+  ]
+}
+
+post {
+  url: {{baseUrl}}/auth/2fa/verify
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{member_token}}
+}
+
+body:json {
+  {
+    "code": "000000"
+  }
+}
+
+assert {
+  res.status: in [200, 400]
+}
+
+docs {
+  Verifies TOTP 6-digit code. In manual testing with an authenticator app, replace '000000' with the generated code to receive 200 OK.
+}

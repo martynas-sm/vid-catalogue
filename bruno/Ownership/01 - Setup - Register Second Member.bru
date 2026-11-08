@@ -1,0 +1,30 @@
+meta {
+  name: 01 - Setup - Register Second Member
+  type: http
+  seq: 1
+  tags: [
+    Ownership
+  ]
+}
+
+post {
+  url: {{baseUrl}}/auth/register
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "username": "second_member",
+    "email": "second_member@example.com",
+    "password": "Password123!"
+  }
+}
+
+assert {
+  res.status: in [201, 400, 409]
+}
+
+docs {
+  Registers a secondary member user for non-owner permission testing.
+}

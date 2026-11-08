@@ -1,0 +1,26 @@
+meta {
+  name: 401 Unauthorized - Invalid Token
+  type: http
+  seq: 6
+  tags: [
+    Errors
+  ]
+}
+
+get {
+  url: {{baseUrl}}/catalogs
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer invalid.jwt.token
+}
+
+assert {
+  res.status: eq 401
+}
+
+docs {
+  Demonstrates 401 Unauthorized when a request presents a malformed, tampered, or expired Bearer token.
+}

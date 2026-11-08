@@ -1,0 +1,34 @@
+meta {
+  name: 04 - Setup - Login Admin
+  type: http
+  seq: 4
+  tags: [
+    Ownership
+  ]
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "username": "adomas",
+    "password": "Password123!"
+  }
+}
+
+vars:post-response {
+  admin_token: res.body.access_token
+}
+
+assert {
+  res.status: eq 200
+  res.body.access_token: isDefined
+}
+
+docs {
+  Logs in administrator 'adomas' and captures admin_token.
+}

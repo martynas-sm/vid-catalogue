@@ -1,0 +1,39 @@
+meta {
+  name: Login Member
+  type: http
+  seq: 2
+  tags: [
+    Auth
+  ]
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "username": "martynas",
+    "password": "Password123!"
+  }
+}
+
+vars:post-response {
+  creator_token: res.body.access_token
+  member_token: res.body.access_token
+  token: res.body.access_token
+  refresh_token: res.body.refresh_token
+}
+
+assert {
+  res.status: eq 200
+  res.body.access_token: isDefined
+  res.body.refresh_token: isDefined
+  res.body.token_type: eq bearer
+}
+
+docs {
+  Authenticates standard member 'martynas' and extracts access_token and refresh_token into runtime variables.
+}

@@ -1,0 +1,26 @@
+meta {
+  name: 403 Forbidden - Role Restricted
+  type: http
+  seq: 7
+  tags: [
+    Errors
+  ]
+}
+
+get {
+  url: {{baseUrl}}/users
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{creator_token}}
+}
+
+assert {
+  res.status: eq 403
+}
+
+docs {
+  Demonstrates 403 Forbidden when an authenticated user with insufficient role permissions ('creator') attempts to access an admin-restricted endpoint.
+}

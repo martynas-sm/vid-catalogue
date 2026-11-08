@@ -1,0 +1,40 @@
+meta {
+  name: 403 Forbidden - Non-owner Annotation Modification
+  type: http
+  seq: 9
+  tags: [
+    Errors
+  ]
+}
+
+put {
+  url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id/annotations/:annotation_id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  catalog_id: 1
+  video_id: 1
+  annotation_id: 1
+}
+
+headers {
+  Authorization: Bearer {{member_token}}
+}
+
+body:json {
+  {
+    "text": "Tampered Annotation Text",
+    "from_dur": 10.0,
+    "to_dur": 30.0
+  }
+}
+
+assert {
+  res.status: eq 403
+}
+
+docs {
+  Demonstrates 403 Forbidden when an authenticated user attempts to modify an annotation owned by another user.
+}

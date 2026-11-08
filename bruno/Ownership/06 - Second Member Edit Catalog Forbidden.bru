@@ -1,0 +1,38 @@
+meta {
+  name: 06 - Second Member Edit Catalog Forbidden
+  type: http
+  seq: 6
+  tags: [
+    Ownership
+  ]
+}
+
+put {
+  url: {{baseUrl}}/catalogs/:catalog_id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  catalog_id: {{owned_catalog_id}}
+}
+
+headers {
+  Authorization: Bearer {{second_member_token}}
+}
+
+body:json {
+  {
+    "name": "Tampered Catalog Name",
+    "description": "Unauthorized update attempt by non-owner member",
+    "is_public": true
+  }
+}
+
+assert {
+  res.status: eq 403
+}
+
+docs {
+  Non-owner member attempts to edit catalog owned by another member, expecting HTTP 403 Forbidden.
+}

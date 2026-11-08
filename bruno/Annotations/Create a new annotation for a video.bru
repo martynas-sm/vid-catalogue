@@ -18,6 +18,10 @@ params:path {
   video_id: 1
 }
 
+headers {
+  Authorization: Bearer {{token}}
+}
+
 body:json {
   {
     "text": "Summary of 3D determinant computation formula",

@@ -17,6 +17,10 @@ params:path {
   catalog_id: 1
 }
 
+headers {
+  Authorization: Bearer {{token}}
+}
+
 body:json {
   {
     "title": "Eigenvectors and eigenvalues | Essence of linear algebra, chapter 14",

@@ -13,12 +13,15 @@ post {
   auth: inherit
 }
 
+headers {
+  Authorization: Bearer {{token}}
+}
+
 body:json {
   {
     "name": "Cloud Computing",
     "description": "Distributed systems, Docker containers, and Kubernetes architectures",
-    "is_public": true,
-    "user_id": 1
+    "is_public": true
   }
 }
 

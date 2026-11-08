@@ -1,0 +1,30 @@
+meta {
+  name: 401 Unauthorized - Missing Token
+  type: http
+  seq: 5
+  tags: [
+    Errors
+  ]
+}
+
+post {
+  url: {{baseUrl}}/catalogs
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Unauthorized Catalog",
+    "description": "Attempting to create a catalog without authentication token",
+    "is_public": true
+  }
+}
+
+assert {
+  res.status: eq 401
+}
+
+docs {
+  Demonstrates 401 Unauthorized when an unauthenticated request attempts to access a protected endpoint without an Authorization Bearer token.
+}

@@ -13,6 +13,10 @@ get {
   auth: inherit
 }
 
+headers {
+  Authorization: Bearer {{token}}
+}
+
 params:path {
   catalog_id: 1
 }

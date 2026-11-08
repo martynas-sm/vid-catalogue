@@ -1,0 +1,44 @@
+meta {
+  name: 10 - Member Creates Annotation
+  type: http
+  seq: 10
+  tags: [
+    Ownership
+  ]
+}
+
+post {
+  url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id/annotations
+  body: json
+  auth: inherit
+}
+
+params:path {
+  catalog_id: 1
+  video_id: 1
+}
+
+headers {
+  Authorization: Bearer {{owner_token}}
+}
+
+body:json {
+  {
+    "text": "Annotation owned by martynas",
+    "from_dur": 10.0,
+    "to_dur": 25.0
+  }
+}
+
+vars:post-response {
+  owned_annotation_id: res.body.id
+}
+
+assert {
+  res.status: eq 201
+  res.body.id: isDefined
+}
+
+docs {
+  Member creates an annotation on video 1 in catalog 1. System binds annotation ownership to the caller.
+}

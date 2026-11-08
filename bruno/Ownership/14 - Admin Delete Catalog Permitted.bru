@@ -1,0 +1,30 @@
+meta {
+  name: 14 - Admin Delete Catalog Permitted
+  type: http
+  seq: 14
+  tags: [
+    Ownership
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/catalogs/:catalog_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  catalog_id: {{owned_catalog_id}}
+}
+
+headers {
+  Authorization: Bearer {{admin_token}}
+}
+
+assert {
+  res.status: in [200, 204]
+}
+
+docs {
+  Administrator deletes member's test catalog via admin privilege override, expecting HTTP 200 or 204.
+}

@@ -17,12 +17,15 @@ params:path {
   catalog_id: 1
 }
 
+headers {
+  Authorization: Bearer {{token}}
+}
+
 body:json {
   {
     "name": "Linear Algebra (Revised)",
     "description": "Visual geometric intuition of vectors, matrices, determinants, and linear transformations",
-    "is_public": true,
-    "user_id": 1
+    "is_public": true
   }
 }
 

@@ -1,0 +1,28 @@
+meta {
+  name: Refresh After Logout
+  type: http
+  seq: 9
+  tags: [
+    Auth
+  ]
+}
+
+post {
+  url: {{baseUrl}}/auth/refresh
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "refresh_token": "{{refresh_token}}"
+  }
+}
+
+assert {
+  res.status: eq 401
+}
+
+docs {
+  Attempts to use a revoked refresh token after logout, expecting HTTP 401 Unauthorized.
+}

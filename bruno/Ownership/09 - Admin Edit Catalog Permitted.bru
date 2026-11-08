@@ -1,0 +1,39 @@
+meta {
+  name: 09 - Admin Edit Catalog Permitted
+  type: http
+  seq: 9
+  tags: [
+    Ownership
+  ]
+}
+
+put {
+  url: {{baseUrl}}/catalogs/:catalog_id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  catalog_id: {{owned_catalog_id}}
+}
+
+headers {
+  Authorization: Bearer {{admin_token}}
+}
+
+body:json {
+  {
+    "name": "Admin Overridden Catalog",
+    "description": "Legitimate modification performed via admin role override",
+    "is_public": true
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.name: eq Admin Overridden Catalog
+}
+
+docs {
+  Administrator edits member's catalog using administrative privilege override, expecting HTTP 200 OK.
+}

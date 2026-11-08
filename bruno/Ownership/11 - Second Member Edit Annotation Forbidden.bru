@@ -1,0 +1,40 @@
+meta {
+  name: 11 - Second Member Edit Annotation Forbidden
+  type: http
+  seq: 11
+  tags: [
+    Ownership
+  ]
+}
+
+put {
+  url: {{baseUrl}}/catalogs/:catalog_id/videos/:video_id/annotations/:annotation_id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  catalog_id: 1
+  video_id: 1
+  annotation_id: {{owned_annotation_id}}
+}
+
+headers {
+  Authorization: Bearer {{second_member_token}}
+}
+
+body:json {
+  {
+    "text": "Tampered annotation content",
+    "from_dur": 10.0,
+    "to_dur": 25.0
+  }
+}
+
+assert {
+  res.status: eq 403
+}
+
+docs {
+  Non-owner member attempts to edit annotation owned by another member, expecting HTTP 403 Forbidden.
+}

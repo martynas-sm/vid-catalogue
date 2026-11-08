@@ -1,0 +1,32 @@
+meta {
+  name: 2FA Setup
+  type: http
+  seq: 5
+  tags: [
+    Auth
+  ]
+}
+
+post {
+  url: {{baseUrl}}/auth/2fa/setup
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{member_token}}
+}
+
+vars:post-response {
+  totp_secret: res.body.secret
+}
+
+assert {
+  res.status: eq 200
+  res.body.secret: isDefined
+  res.body.otpauth_uri: isDefined
+}
+
+docs {
+  Initializes TOTP 2FA for authenticated user, returning base32 secret and otpauth URI.
+}

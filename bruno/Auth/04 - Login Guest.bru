@@ -1,0 +1,36 @@
+meta {
+  name: Login Guest
+  type: http
+  seq: 4
+  tags: [
+    Auth
+  ]
+}
+
+post {
+  url: {{baseUrl}}/auth/login
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "username": "guest_user",
+    "password": "Password123!"
+  }
+}
+
+vars:post-response {
+  viewer_token: res.body.access_token
+  guest_token: res.body.access_token
+}
+
+assert {
+  res.status: eq 200
+  res.body.access_token: isDefined
+  res.body.token_type: eq bearer
+}
+
+docs {
+  Authenticates guest role user 'guest_user' and stores guest_token.
+}

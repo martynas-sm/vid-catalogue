@@ -1,0 +1,35 @@
+meta {
+  name: Refresh Token
+  type: http
+  seq: 7
+  tags: [
+    Auth
+  ]
+}
+
+post {
+  url: {{baseUrl}}/auth/refresh
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "refresh_token": "{{refresh_token}}"
+  }
+}
+
+vars:post-response {
+  member_token: res.body.access_token
+  token: res.body.access_token
+}
+
+assert {
+  res.status: eq 200
+  res.body.access_token: isDefined
+  res.body.token_type: eq bearer
+}
+
+docs {
+  Exchanges an active refresh token for a newly issued access token.
+}

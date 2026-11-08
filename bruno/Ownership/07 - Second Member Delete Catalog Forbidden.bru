@@ -1,0 +1,30 @@
+meta {
+  name: 07 - Second Member Delete Catalog Forbidden
+  type: http
+  seq: 7
+  tags: [
+    Ownership
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/catalogs/:catalog_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  catalog_id: {{owned_catalog_id}}
+}
+
+headers {
+  Authorization: Bearer {{second_member_token}}
+}
+
+assert {
+  res.status: eq 403
+}
+
+docs {
+  Non-owner member attempts to delete catalog owned by another member, expecting HTTP 403 Forbidden.
+}
